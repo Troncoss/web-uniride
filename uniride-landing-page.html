@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniride - Viajes Compartidos</title>
+    <meta name="description" content="Plataforma para compartir viajes entre conductores y viajeros">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gray-50 font-sans">
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Bienvenido a Uniride</h2>
+                <p class="text-gray-600">Inicia sesión o regístrate para continuar</p>
+            </div>
+            
+            <div id="authTabs" class="flex border-b mb-6">
+                <button id="loginTab" class="flex-1 py-3 font-medium text-primary border-b-2 border-primary">Iniciar Sesión</button>
+                <button id="registerTab" class="flex-1 py-3 font-medium text-gray-500">Registrarse</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" class="h-4 w-4 text-primary rounded">
+                        <label for="remember" class="ml-2 text-sm text-gray-600">Recordarme</label>
+                    </div>
+                    <a href="#" class="text-sm text-primary hover:underline">¿Olvidaste tu contraseña?</a>
+                </div>
+                <div class="mt-6">
+                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition duration-200">Iniciar Sesión</button>
+                </div>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                    <input type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                    <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="terms" required class="h-4 w-4 text-primary rounded">
+                    <label for="terms" class="ml-2 text-sm text-gray-600">Acepto los <a href="#" class="text-primary hover:underline">términos y condiciones</a></label>
+                </div>
+                <div class="mt-6">
+                    <button type="submit" class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200">Crear Cuenta</button>
+                </div>
+            </form>
+            
+            <div class="mt-6 pt-6 border-t text-center">
+                <p class="text-sm text-gray-600">¿Eres conductor o viajero? Puedes usar ambas funciones con una sola cuenta.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content (Hidden until login) -->
+    <div id="mainContent" class="hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-xl">U</span>
+                            </div>
+                            <h1 class="text-2xl font-bold text-gray-800">Uniride</h1>
+                        </div>
+                        <div class="md:hidden">
+                            <button id="mobileMenuBtn" class="text-gray-600">
+                                <i class="fas fa-bars text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6">
+                        <div id="userInfo" class="text-sm text-gray-600">
+                            <span class="font-medium">Sesión iniciada como:</span>
+                            <span id="userName" class="text-primary font-semibold ml-1">Usuario</span>
+                        </div>
+                        
+                        <div class="hidden md:flex items-center space-x-4" id="socialLinks">
+                            <!-- Social links will be rendered here -->
+                        </div>
+                        
+                        <button id="logoutBtn" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-200">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Mobile Social Links -->
+                <div id="mobileSocialLinks" class="mt-4 md:hidden flex items-center justify-center space-x-6">
+                    <!-- Mobile social links will be rendered here -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">¿Qué quieres hacer hoy?</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Como usuario de Uniride, puedes crear viajes como conductor o unirte a viajes existentes como viajero.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <!-- Panel 1: Crear Viaje -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-car text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Crear Viaje</h3>
+                            <p class="text-gray-600">Publica tu viaje como conductor</p>
+                        </div>
+                    </div>
+                    
+                    <form id="createTripForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Origen</label>
+                                <input type="text" required placeholder="Ciudad de origen" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                                <input type="text" required placeholder="Ciudad de destino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                                <input type="date" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+                                <input type="time" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Asientos Disponibles</label>
+                            <div class="flex items-center space-x-4">
+                                <button type="button" class="seat-btn w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50" data-action="decrease">-</button>
+                                <span id="seatCount" class="text-2xl font-bold text-gray-800">4</span>
+                                <button type="button" class="seat-btn w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50" data-action="increase">+</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio por persona</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-500">$</span>
+                                <input type="number" required min="0" step="0.01" placeholder="0.00" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción (opcional)</label>
+                            <textarea rows="3" placeholder="Detalles adicionales sobre el viaje..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg hover:bg-secondary transition duration-200 flex items-center justify-center">
+                            <i class="fas fa-plus-circle mr-3"></i>Publicar Viaje
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Panel 2: Viajar en Viajes Programados -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-accent bg-opacity-10 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-users text-accent text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Viajar en Viajes Programados</h3>
+                            <p class="text-gray-600">Únete a viajes existentes como viajero</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex space-x-2 mb-4">
+                            <input type="text" id="searchTrips" placeholder="Buscar por origen o destino..." class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <button id="searchBtn" class="px-6 bg-primary text-white rounded-lg hover:bg-secondary transition duration-200">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button class="filter-btn px-4 py-2 bg-primary text-white rounded-lg text-sm" data-filter="all">Todos</button>
+                            <!-- Filter buttons will be rendered here -->
+                        </div>
+                    </div>
+                    
+                    <div id="tripsList" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                        <!-- Trips will be rendered here -->
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-gray-600 text-sm">¿No encuentras lo que buscas? <a href="#" class="text-primary hover:underline">Filtra por fecha específica</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Trips Section -->
+            <div class="mt-16 max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800">Tus Viajes Recientes</h3>
+                    <a href="#" class="text-primary hover:underline font-medium">Ver todos</a>
+                </div>
+                
+                <div id="recentTrips" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Recent trips will be rendered here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white mt-16">
+            <div class="container mx-auto px-4 py-12">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                                <span class="text-primary font-bold text-xl">U</span>
+                            </div>
+                            <h3 class="text-2xl font-bold">Uniride</h3>
+                        </div>
+                        <p class="text-gray-300">Conectando conductores y viajeros para viajes más económicos y sostenibles.</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Para Conductores</h4>
+                        <ul id="driverLinks" class="space-y-2">
+                            <!-- Driver links will be rendered here -->
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Para Viajeros</h4>
+                        <ul id="travelerLinks" class="space-y-2">
+                            <!-- Traveler links will be rendered here -->
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Contacto</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-gray-300 mr-3"></i>
+                                <span>info@uniride.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-gray-300 mr-3"></i>
+                                <span>+1 (555) 123-4567</span>
+                            </div>
+                            <div class="flex items-center space-x-4 mt-4">
+                                <!-- Social icons will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                    <p>&copy; 2024 Uniride. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Data Layer
+        const socialMedia = [
+            { "platform": "Twitter", "icon": "fab fa-twitter", "url": "#", "color": "text-blue-400" },
+            { "platform": "Instagram", "icon": "fab fa-instagram", "url": "#", "color": "text-pink-500" },
+            { "platform": "Facebook", "icon": "fab fa-facebook", "url": "#", "color": "text-blue-600" },
+            { "platform": "LinkedIn", "icon": "fab fa-linkedin", "url": "#", "color": "text-blue-700" }
+        ];
+
+        const tripFilters = [
+            { "id": "today", "label": "Hoy" },
+            { "id": "tomorrow", "label": "Mañana" },
+            { "id": "weekend", "label": "Este fin" },
+            { "id": "cheap", "label": "Más económicos" },
+            { "id": "nearby", "label": "Cercanos" }
+        ];
+
+        const availableTrips = [
+            { 
+                "id": 1, 
+                "origin": "Madrid", 
+                "destination": "Barcelona", 
+                "date": "2024-03-15", 
+                "time": "08:00", 
+                "seats": 3, 
+                "price": 25.50, 
+                "driver": "Carlos M.", 
+                "rating": 4.8,
+                "car": "Toyota Prius",
+                "filter": "today"
+            },
+            { 
+                "id": 2, 
+                "origin": "Valencia", 
+                "destination": "Alicante", 
+                "date": "2024-03-16", 
+                "time": "10:30", 
+                "seats": 2, 
+                "price": 18.00, 
+                "driver": "Ana R.", 
+                "rating": 4.9,
+                "car": "Volkswagen Golf",
+                "filter": "tomorrow"
+            },
+            { 
+                "id": 3, 
+                "origin": "Sevilla", 
+                "destination": "Málaga", 
+                "date": "2024-03-17", 
+                "time": "14:00", 
+                "seats": 4, 
+                "price": 22.00, 
+                "driver": "Miguel T.", 
+                "rating": 4.7,
+                "car": "Ford Focus",
+                "filter": "weekend"
+            },
+            { 
+                "id": 4, 
+                "origin": "Bilbao", 
+                "destination": "San Sebastián", 
+                "date": "2024-03-15", 
+                "time": "09:15", 
+                "seats": 1, 
+                "price": 15.00, 
+                "driver": "Laura G.", 
+                "rating": 4.5,
+                "car": "Hyundai i30",
+                "filter": "cheap"
+            },
+            { 
+                "id": 5, 
+                "origin": "Zaragoza", 
+                "destination": "Lleida", 
+                "date": "2024-03-16", 
+                "time": "11:45", 
+                "seats": 3, 
+                "price": 20.00, 
+                "driver": "David L.", 
+                "rating": 4.6,
+                "car": "Seat León",
+                "filter": "nearby"
+            }
+        ];
+
+        const recentTrips = [
+            { 
+                "type": "driver", 
+                "origin": "Madrid", 
+                "destination": "Toledo", 
+                "date": "2024-03-10", 
+                "passengers": 3,
+                "earnings": 45.00
+            },
+            { 
+                "type": "traveler", 
+                "origin": "Barcelona", 
+                "destination": "Girona", 
+                "date": "2024-03-08", 
+                "driver": "María S.",
+                "cost": 18.50
+            },
+            { 
+                "type": "driver", 
+                "origin": "Valencia", 
+                "destination": "Castellón", 
+                "date": "2024-03-05", 
+                "passengers": 2,
+                "earnings": 32.00
+            }
+        ];
+
+        const driverLinks = [
+            { "label": "Cómo crear viajes", "url": "#" },
+            { "label": "Tarifas y comisiones", "url": "#" },
+            { "label": "Seguridad para conductores", "url": "#" },
+            { "label": "Preguntas frecuentes", "url": "#" }
+        ];
+
+        const travelerLinks = [
+            { "label": "Cómo reservar", "url": "#" },
+            { "label": "Política de cancelación", "url": "#" },
+            { "label": "Seguridad para viajeros", "url": "#" },
+            { "label": "Sistema de valoraciones", "url": "#" }
+        ];
+
+        // Reusable Render Functions
+        function renderSocialLinks(items, isMobile = false) {
+            return items.map(item => 
+                `<a href="${item.url}" class="${isMobile ? 'text-2xl' : 'text-lg'} ${item.color} hover:opacity-80 transition duration-200" aria-label="${item.platform}">
+                    <i class="${item.icon}"></i>
+                </a>`
+            ).join("");
+        }
+
+        function renderFilterButtons(items) {
+            return items.map(item => 
+                `<button class="filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition duration-200" data-filter="${item.id}">
+                    ${item.label}
+                </button>`
+            ).join("");
+        }
+
+        function renderTripCards(items) {
+            if (items.length === 0) {
+                return `<div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-search text-4xl mb-4"></i>
+                    <p>No se encontraron viajes con esos criterios.</p>
+                </div>`;
+            }
+            
+            return items.map(trip => `
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-primary transition duration-200">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="font-bold text-lg text-gray-800">${trip.origin} → ${trip.destination}</h4>
+                            <p class="text-gray-600 text-sm">${trip.date} a las ${trip.time}</p>
+                        </div>
+                        <span class="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">$${trip.price.toFixed(2)}</span>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-user text-gray-400 mr-3"></i>
+                            <span>Conductor: ${trip.driver}</span>
+                            <div class="ml-2 flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span>${trip.rating}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-car text-gray-400 mr-3"></i>
+                            <span>${trip.car}</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-users text-gray-400 mr-3"></i>
+                            <span>${trip.seats} asiento${trip.seats !== 1 ? 's' : ''} disponible${trip.seats !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 flex items-center justify-center join-trip-btn" data-trip-id="${trip.id}">
+                        <i class="fas fa-check-circle mr-2"></i>Unirse al Viaje
+                    </button>
+                </div>
+            `).join("");
+        }
+
+        function renderRecentTrips(items) {
+            return items.map(trip => `
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full text-sm font-medium ${trip.type === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                            ${trip.type === 'driver' ? 'Conductor' : 'Viajero'}
+                        </span>
+                        <span class="text-gray-500 text-sm">${trip.date}</span>
+                    </div>
+                    
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">${trip.origin} → ${trip.destination}</h4>
+                    
+                    ${trip.type === 'driver' ? 
+                        `<div class="space-y-2">
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-users text-gray-400 mr-3"></i>
+                                <span>${trip.passengers} pasajero${trip.passengers !== 1 ? 's' : ''}</span>
+                            </div>
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-money-bill-wave text-gray-400 mr-3"></i>
+                                <span>Ganancia: $${trip.earnings.toFixed(2)}</span>
+                            </div>
+                        </div>` :
+                        `<div class="space-y-2">
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-user text-gray-400 mr-3"></i>
+                                <span>Conductor: ${trip.driver}</span>
+                            </div>
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-money-bill-wave text-gray-400 mr-3"></i>
+                                <span>Costo: $${trip.cost.toFixed(2)}</span>
+                            </div>
+                        </div>`
+                    }
+                </div>
+            `).join("");
+        }
+
+        function renderFooterLinks(items, listId) {
+            return items.map(item => 
+                `<li><a href="${item.url}" class="text-gray-300 hover:text-white transition duration-200">${item.label}</a></li>`
+            ).join("");
+        }
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render all dynamic content
+            document.getElementById('socialLinks').innerHTML = renderSocialLinks(socialMedia);
+            document.getElementById('mobileSocialLinks').innerHTML = renderSocialLinks(socialMedia, true);
+            
+            const filterContainer = document.querySelector('.flex-wrap.gap-2.mb-6');
+            filterContainer.innerHTML += renderFilterButtons(tripFilters);
+            
+            document.getElementById('tripsList').innerHTML = renderTripCards(availableTrips);
+            document.getElementById('recentTrips').innerHTML = renderRecentTrips(recentTrips);
+            document.getElementById('driverLinks').innerHTML = renderFooterLinks(driverLinks);
+            document.getElementById('travelerLinks').innerHTML = renderFooterLinks(travelerLinks);
+            
+            // Auth Modal Logic
+            const authModal = document.getElementById('authModal');
+            const mainContent = document.getElementById('mainContent');
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const userName = document.getElementById('userName');
+            
+            // Show auth modal by default
+            authModal.classList.remove('hidden');
+            
+            // Tab switching
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('border-primary', 'text-primary');
+                registerTab.classList.remove('border-primary', 'text-primary');
+                registerTab.classList.add('text-gray-500');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            });
+            
+            registerTab.addEventListener('click', () => {
+                registerTab.classList.add('border-primary', 'text-primary');
+                loginTab.classList.remove('border-primary', 'text-primary');
+                loginTab.classList.add('text-gray-500');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            });
+            
+            // Form submissions
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = loginForm.querySelector('input[type="email"]').value;
+                const name = email.split('@')[0];
+                userName.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+                
+                // Simulate login
+                authModal.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                
+                // Show success message
+                showNotification('¡Bienvenido a Uniride!', 'success');
+            });
+            
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = registerForm.querySelector('input[type="text"]').value;
+                userName.textContent = name;
+                
+                // Simulate registration
+                authModal.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                
+                // Show success message
+                showNotification('¡Cuenta creada exitosamente!', 'success');
+            });
+            
+            // Logout
+            logoutBtn.addEventListener('click', () => {
+                mainContent.classList.add('hidden');
+                authModal.classList.remove('hidden');
+                showNotification('Sesión cerrada correctamente', 'info');
+            });
+            
+            // Seat counter
+            let seatCount = 4;
+            const seatDisplay = document.getElementById('seatCount');
+            
+            document.querySelectorAll('.seat-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.dataset.action === 'increase' && seatCount < 8) {
+                        seatCount++;
+                    } else if (btn.dataset.action === 'decrease' && seatCount > 1) {
+                        seatCount--;
+                    }
+                    seatDisplay.textContent = seatCount;
+                });
+            });
+            
+            // Create trip form
+            document.getElementById('createTripForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                showNotification('¡Viaje publicado exitosamente!', 'success');
+                e.target.reset();
+                seatCount = 4;
+                seatDisplay.textContent = seatCount;
+            });
+            
+            // Trip filtering and search
+            const searchInput = document.getElementById('searchTrips');
+            const searchBtn = document.getElementById('searchBtn');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            function filterTrips() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
+                
+                const filtered = availableTrips.filter(trip => {
+                    const matchesSearch = trip.origin.toLowerCase().includes(searchTerm) || 
+                                         trip.destination.toLowerCase().includes(searchTerm);
+                    const matchesFilter = activeFilter === 'all' || trip.filter === activeFilter;
+                    return matchesSearch && matchesFilter;
+                });
+                
+                document.getElementById('tripsList').innerHTML = renderTripCards(filtered);
+                bindJoinTripEvents();
+            }
+            
+            searchInput.addEventListener('input', filterTrips);
+            searchBtn.addEventListener('click', filterTrips);
+            
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterButtons.forEach(b => b.classList.remove('bg-primary', 'text-white'));
+                    filterButtons.forEach(b => b.classList.add('bg-gray-100', 'text-gray-700'));
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                    btn.classList.add('bg-primary', 'text-white');
+                    filterTrips();
+                });
+            });
+            
+            // Join trip functionality
+            function bindJoinTripEvents() {
+                document.querySelectorAll('.join-trip-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const tripId = this.dataset.tripId;
+                        const trip = availableTrips.find(t => t.id == tripId);
+                        if (trip && trip.seats > 0) {
+                            trip.seats--;
+                            filterTrips();
+                            showNotification(`¡Te has unido al viaje de ${trip.origin} a ${trip.destination}!`, 'success');
+                        }
+                    });
+                });
+            }
+            
+            bindJoinTripEvents();
+            
+            // Mobile menu
+            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+                const mobileSocial = document.getElementById('mobileSocialLinks');
+                mobileSocial.classList.toggle('hidden');
+            });
+            
+            // Notification function
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 ${
+                    type === 'success' ? 'bg-green-500 text-white' : 
+                    type === 'error' ? 'bg-red-500 text-white' : 
+                    'bg-blue-500 text-white'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-3"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            // Prevent default anchor behavior
+            document.addEventListener('click', function(event) {
+                const link = event.target.closest('a[href="#"]');
+                if (link) {
+                    event.preventDefault();
+                    showNotification('Enlace de ejemplo - Funcionalidad en desarrollo', 'info');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
