@@ -28,102 +28,177 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="min-h-screen bg-gray-50 font-sans">
-    <!-- Login/Register Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Bienvenido a Uniride</h2>
-                <p class="text-gray-600">Inicia sesión o regístrate para continuar</p>
-            </div>
-            
-            <div id="authTabs" class="flex border-b mb-6">
-                <button id="loginTab" class="flex-1 py-3 font-medium text-primary border-b-2 border-primary">Iniciar Sesión</button>
-                <button id="registerTab" class="flex-1 py-3 font-medium text-gray-500">Registrarse</button>
-            </div>
-            
-            <!-- Login Form -->
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                    <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="remember" class="h-4 w-4 text-primary rounded">
-                        <label for="remember" class="ml-2 text-sm text-gray-600">Recordarme</label>
-                    </div>
-                    <a href="#" class="text-sm text-primary hover:underline">¿Olvidaste tu contraseña?</a>
-                </div>
-                <div class="mt-6">
-                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition duration-200">Iniciar Sesión</button>
-                </div>
-            </form>
-            
-            <!-- Register Form -->
-            <form id="registerForm" class="space-y-4 hidden">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                    <input type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                    <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
-                    <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="terms" required class="h-4 w-4 text-primary rounded">
-                    <label for="terms" class="ml-2 text-sm text-gray-600">Acepto los <a href="#" class="text-primary hover:underline">términos y condiciones</a></label>
-                </div>
-                <div class="mt-6">
-                    <button type="submit" class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200">Crear Cuenta</button>
-                </div>
-            </form>
-            
-            <div class="mt-6 pt-6 border-t text-center">
-                <p class="text-sm text-gray-600">¿Eres conductor o viajero? Puedes usar ambas funciones con una sola cuenta.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content (Hidden until login) -->
-    <div id="mainContent" class="hidden">
+    <!-- Login/Register Page -->
+    <div id="authPage" class="min-h-screen flex flex-col">
         <!-- Header -->
         <header class="bg-white shadow-sm">
             <div class="container mx-auto px-4 py-4">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex justify-center">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold text-3xl">U</span>
+                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800">Uniride</h1>
+                        <p class="text-gray-600 mt-1">Conectando viajes, compartiendo experiencias</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Auth Content -->
+        <main class="flex-1 flex items-center justify-center py-12">
+            <div class="max-w-md w-full px-4">
+                <div id="authTabs" class="flex border-b mb-8">
+                    <button id="loginTab" class="flex-1 py-4 font-medium text-primary border-b-2 border-primary text-lg">Iniciar Sesión</button>
+                    <button id="registerTab" class="flex-1 py-4 font-medium text-gray-500 text-lg">Registrarse</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                        <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
                     <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="remember" class="h-4 w-4 text-primary rounded">
+                            <label for="remember" class="ml-2 text-sm text-gray-600">Recordarme</label>
+                        </div>
+                        <a href="#" class="text-sm text-primary hover:underline">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <div class="mt-8">
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition duration-200 text-lg">Iniciar Sesión</button>
+                    </div>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="registerForm" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                        <input type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                        <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                        <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">¿Cómo usarás Uniride?</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <input type="radio" id="driver" name="userType" value="driver" class="hidden peer">
+                                <label for="driver" class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer text-center peer-checked:border-primary peer-checked:bg-blue-50 hover:border-gray-300 transition duration-200">
+                                    <i class="fas fa-car text-2xl text-primary mb-2"></i>
+                                    <div class="font-medium">Conductor</div>
+                                    <div class="text-sm text-gray-600 mt-1">Crear viajes</div>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="radio" id="traveler" name="userType" value="traveler" class="hidden peer">
+                                <label for="traveler" class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer text-center peer-checked:border-primary peer-checked:bg-blue-50 hover:border-gray-300 transition duration-200">
+                                    <i class="fas fa-users text-2xl text-accent mb-2"></i>
+                                    <div class="font-medium">Viajero</div>
+                                    <div class="text-sm text-gray-600 mt-1">Unirse a viajes</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" id="terms" required class="h-4 w-4 text-primary rounded">
+                        <label for="terms" class="ml-2 text-sm text-gray-600">Acepto los <a href="#" class="text-primary hover:underline">términos y condiciones</a></label>
+                    </div>
+                    <div class="mt-8">
+                        <button type="submit" class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 text-lg">Crear Cuenta</button>
+                    </div>
+                </form>
+                
+                <div class="mt-8 pt-8 border-t text-center">
+                    <p class="text-sm text-gray-600">Puedes cambiar entre conductor y viajero en cualquier momento desde tu perfil.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t mt-12">
+            <div class="container mx-auto px-4 py-8">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold">U</span>
+                            </div>
+                            <span class="text-lg font-bold text-gray-800">Uniride</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <a href="#" class="text-gray-600 hover:text-primary transition duration-200">
+                            <i class="fab fa-x-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-600 hover:text-primary transition duration-200">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-600 hover:text-primary transition duration-200">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="text-center text-gray-500 text-sm mt-6">
+                    <p>&copy; 2024 Uniride. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Main Dashboard Page (Hidden by default) -->
+    <div id="dashboardPage" class="min-h-screen hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <!-- Logo Center -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                                 <span class="text-white font-bold text-xl">U</span>
                             </div>
-                            <h1 class="text-2xl font-bold text-gray-800">Uniride</h1>
-                        </div>
-                        <div class="md:hidden">
-                            <button id="mobileMenuBtn" class="text-gray-600">
-                                <i class="fas fa-bars text-xl"></i>
-                            </button>
+                            <h1 class="text-2xl font-bold text-gray-800 hidden md:block">Uniride</h1>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-6">
-                        <div id="userInfo" class="text-sm text-gray-600">
+                    <!-- Left: User Info -->
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-gray-600">
                             <span class="font-medium">Sesión iniciada como:</span>
                             <span id="userName" class="text-primary font-semibold ml-1">Usuario</span>
+                            <span id="userTypeBadge" class="ml-2 px-2 py-1 rounded-full text-xs font-medium"></span>
                         </div>
-                        
-                        <div class="hidden md:flex items-center space-x-4" id="socialLinks">
-                            <!-- Social links will be rendered here -->
+                    </div>
+                    
+                    <!-- Right: Social & Logout -->
+                    <div class="flex items-center space-x-4">
+                        <div class="hidden md:flex items-center space-x-3 text-gray-600">
+                            <span class="text-sm">Contáctanos en:</span>
+                            <div class="flex items-center space-x-3">
+                                <a href="#" class="hover:text-gray-800 transition duration-200">
+                                    <i class="fab fa-x-twitter"></i>
+                                </a>
+                                <a href="#" class="hover:text-gray-800 transition duration-200">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            </div>
                         </div>
                         
                         <button id="logoutBtn" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-200">
@@ -133,20 +208,30 @@
                 </div>
                 
                 <!-- Mobile Social Links -->
-                <div id="mobileSocialLinks" class="mt-4 md:hidden flex items-center justify-center space-x-6">
-                    <!-- Mobile social links will be rendered here -->
+                <div class="md:hidden mt-4 flex items-center justify-center space-x-6 text-gray-600">
+                    <span class="text-sm">Contáctanos en:</span>
+                    <div class="flex items-center space-x-4">
+                        <a href="#" class="hover:text-gray-800 transition duration-200">
+                            <i class="fab fa-x-twitter"></i>
+                        </a>
+                        <a href="#" class="hover:text-gray-800 transition duration-200">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="container mx-auto px-4 py-8">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">¿Qué quieres hacer hoy?</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Como usuario de Uniride, puedes crear viajes como conductor o unirte a viajes existentes como viajero.</p>
+            <!-- Welcome Section -->
+            <div class="mb-12 text-center">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Bienvenido a tu panel de Uniride</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto" id="welcomeMessage">Gestiona tus viajes y descubre nuevas experiencias</p>
             </div>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <!-- Main Panels -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16">
                 <!-- Panel 1: Crear Viaje -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                     <div class="flex items-center mb-6">
@@ -246,8 +331,88 @@
                 </div>
             </div>
             
+            <!-- Multimedia Section -->
+            <div class="max-w-6xl mx-auto mb-16">
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-images text-purple-600 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800">Galería de Viajes</h3>
+                                <p class="text-gray-600">Comparte y descubre experiencias de la comunidad</p>
+                            </div>
+                        </div>
+                        <button id="uploadPhotoBtn" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 flex items-center">
+                            <i class="fas fa-upload mr-2"></i>Subir Foto
+                        </button>
+                    </div>
+                    
+                    <!-- Upload Modal -->
+                    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+                        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold text-gray-800">Subir Foto del Viaje</h3>
+                                <button id="closeUploadModal" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <form id="uploadPhotoForm" class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                                    <input type="text" required placeholder="Mi viaje a..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                                    <textarea rows="3" placeholder="Comparte tu experiencia..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ruta del viaje</label>
+                                    <input type="text" placeholder="Origen - Destino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Subir foto</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition duration-200 cursor-pointer" id="dropZone">
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                        <p class="text-gray-600">Arrastra y suelta tu foto aquí</p>
+                                        <p class="text-gray-500 text-sm mt-2">o haz clic para seleccionar</p>
+                                        <input type="file" id="photoInput" accept="image/*" class="hidden">
+                                    </div>
+                                    <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
+                                </div>
+                                
+                                <div class="flex space-x-4">
+                                    <button type="button" id="cancelUpload" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
+                                        Publicar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Photo Grid -->
+                    <div id="photoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Photos will be rendered here -->
+                    </div>
+                    
+                    <div class="text-center mt-8">
+                        <button id="loadMorePhotos" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200">
+                            <i class="fas fa-sync-alt mr-2"></i>Cargar más fotos
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Recent Trips Section -->
-            <div class="mt-16 max-w-6xl mx-auto">
+            <div class="max-w-6xl mx-auto">
                 <div class="flex items-center justify-between mb-8">
                     <h3 class="text-2xl font-bold text-gray-800">Tus Viajes Recientes</h3>
                     <a href="#" class="text-primary hover:underline font-medium">Ver todos</a>
@@ -299,7 +464,15 @@
                                 <span>+1 (555) 123-4567</span>
                             </div>
                             <div class="flex items-center space-x-4 mt-4">
-                                <!-- Social icons will be rendered here -->
+                                <a href="#" class="text-gray-300 hover:text-white transition duration-200">
+                                    <i class="fab fa-x-twitter"></i>
+                                </a>
+                                <a href="#" class="text-gray-300 hover:text-white transition duration-200">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="#" class="text-gray-300 hover:text-white transition duration-200">
+                                    <i class="fab fa-facebook"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -314,13 +487,6 @@
 
     <script>
         // Data Layer
-        const socialMedia = [
-            { "platform": "Twitter", "icon": "fab fa-twitter", "url": "#", "color": "text-blue-400" },
-            { "platform": "Instagram", "icon": "fab fa-instagram", "url": "#", "color": "text-pink-500" },
-            { "platform": "Facebook", "icon": "fab fa-facebook", "url": "#", "color": "text-blue-600" },
-            { "platform": "LinkedIn", "icon": "fab fa-linkedin", "url": "#", "color": "text-blue-700" }
-        ];
-
         const tripFilters = [
             { "id": "today", "label": "Hoy" },
             { "id": "tomorrow", "label": "Mañana" },
@@ -424,6 +590,81 @@
             }
         ];
 
+        const travelPhotos = [
+            { 
+                "id": 1, 
+                "title": "Amanecer en la carretera", 
+                "description": "Increíble amanecer durante mi viaje de Madrid a Valencia", 
+                "route": "Madrid - Valencia", 
+                "user": "Carlos M.", 
+                "userType": "driver",
+                "likes": 42,
+                "comments": 8,
+                "image": "https://picsum.photos/400/300?random=101",
+                "date": "2024-03-10"
+            },
+            { 
+                "id": 2, 
+                "title": "Grupo de viaje", 
+                "description": "Conocí a gente increíble en mi viaje compartido", 
+                "route": "Barcelona - Zaragoza", 
+                "user": "Ana R.", 
+                "userType": "traveler",
+                "likes": 28,
+                "comments": 5,
+                "image": "https://picsum.photos/400/300?random=102",
+                "date": "2024-03-08"
+            },
+            { 
+                "id": 3, 
+                "title": "Paisaje de montaña", 
+                "description": "Las vistas durante el viaje por los Pirineos", 
+                "route": "Huesca - Lleida", 
+                "user": "Miguel T.", 
+                "userType": "driver",
+                "likes": 56,
+                "comments": 12,
+                "image": "https://picsum.photos/400/300?random=103",
+                "date": "2024-03-05"
+            },
+            { 
+                "id": 4, 
+                "title": "Parada en ruta", 
+                "description": "Descansando en un pueblo pintoresco", 
+                "route": "Sevilla - Córdoba", 
+                "user": "Laura G.", 
+                "userType": "traveler",
+                "likes": 31,
+                "comments": 6,
+                "image": "https://picsum.photos/400/300?random=104",
+                "date": "2024-03-03"
+            },
+            { 
+                "id": 5, 
+                "title": "Atardecer costero", 
+                "description": "El sol poniéndose sobre el Mediterráneo", 
+                "route": "Alicante - Murcia", 
+                "user": "David L.", 
+                "userType": "driver",
+                "likes": 67,
+                "comments": 15,
+                "image": "https://picsum.photos/400/300?random=105",
+                "date": "2024-03-01"
+            },
+            { 
+                "id": 6, 
+                "title": "Comida de viaje", 
+                "description": "Degustando la gastronomía local durante el viaje", 
+                "route": "San Sebastián - Bilbao", 
+                "user": "Sofía P.", 
+                "userType": "traveler",
+                "likes": 39,
+                "comments": 9,
+                "image": "https://picsum.photos/400/300?random=106",
+                "date": "2024-02-28"
+            }
+        ];
+
         const driverLinks = [
             { "label": "Cómo crear viajes", "url": "#" },
             { "label": "Tarifas y comisiones", "url": "#" },
@@ -439,14 +680,6 @@
         ];
 
         // Reusable Render Functions
-        function renderSocialLinks(items, isMobile = false) {
-            return items.map(item => 
-                `<a href="${item.url}" class="${isMobile ? 'text-2xl' : 'text-lg'} ${item.color} hover:opacity-80 transition duration-200" aria-label="${item.platform}">
-                    <i class="${item.icon}"></i>
-                </a>`
-            ).join("");
-        }
-
         function renderFilterButtons(items) {
             return items.map(item => 
                 `<button class="filter-btn px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition duration-200" data-filter="${item.id}">
@@ -537,38 +770,88 @@
             `).join("");
         }
 
+        function renderTravelPhotos(items) {
+            return items.map(photo => `
+                <div class="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition duration-200">
+                    <div class="relative">
+                        <img src="${photo.image}" alt="${photo.title}" class="w-full h-48 object-cover" loading="lazy">
+                        <div class="absolute top-3 right-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${photo.userType === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                                ${photo.userType === 'driver' ? 'Conductor' : 'Viajero'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-800">${photo.title}</h4>
+                            <span class="text-gray-500 text-sm">${photo.date}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">${photo.description}</p>
+                        <div class="flex items-center text-gray-700 text-sm mb-4">
+                            <i class="fas fa-route text-gray-400 mr-2"></i>
+                            <span>${photo.route}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-gray-600 text-sm">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-user text-gray-400 mr-1"></i>
+                                    <span>${photo.user}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-heart text-red-400 mr-1"></i>
+                                    <span>${photo.likes}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-comment text-gray-400 mr-1"></i>
+                                    <span>${photo.comments}</span>
+                                </div>
+                            </div>
+                            <button class="like-photo-btn text-gray-400 hover:text-red-400 transition duration-200" data-photo-id="${photo.id}">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
         function renderFooterLinks(items, listId) {
             return items.map(item => 
                 `<li><a href="${item.url}" class="text-gray-300 hover:text-white transition duration-200">${item.label}</a></li>`
             ).join("");
         }
 
+        // Application State
+        let currentUser = null;
+        let userType = null;
+        let seatCount = 4;
+
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
-            // Render all dynamic content
-            document.getElementById('socialLinks').innerHTML = renderSocialLinks(socialMedia);
-            document.getElementById('mobileSocialLinks').innerHTML = renderSocialLinks(socialMedia, true);
-            
+            // Render all dynamic content on dashboard
             const filterContainer = document.querySelector('.flex-wrap.gap-2.mb-6');
-            filterContainer.innerHTML += renderFilterButtons(tripFilters);
+            if (filterContainer) {
+                filterContainer.innerHTML += renderFilterButtons(tripFilters);
+            }
             
-            document.getElementById('tripsList').innerHTML = renderTripCards(availableTrips);
-            document.getElementById('recentTrips').innerHTML = renderRecentTrips(recentTrips);
-            document.getElementById('driverLinks').innerHTML = renderFooterLinks(driverLinks);
-            document.getElementById('travelerLinks').innerHTML = renderFooterLinks(travelerLinks);
+            // Initialize dashboard content if needed
+            initializeDashboardContent();
             
             // Auth Modal Logic
-            const authModal = document.getElementById('authModal');
-            const mainContent = document.getElementById('mainContent');
+            const authPage = document.getElementById('authPage');
+            const dashboardPage = document.getElementById('dashboardPage');
             const loginTab = document.getElementById('loginTab');
             const registerTab = document.getElementById('registerTab');
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
             const logoutBtn = document.getElementById('logoutBtn');
             const userName = document.getElementById('userName');
+            const userTypeBadge = document.getElementById('userTypeBadge');
+            const welcomeMessage = document.getElementById('welcomeMessage');
             
-            // Show auth modal by default
-            authModal.classList.remove('hidden');
+            // Show auth page by default
+            authPage.classList.remove('hidden');
+            dashboardPage.classList.add('hidden');
             
             // Tab switching
             loginTab.addEventListener('click', () => {
@@ -592,94 +875,249 @@
                 e.preventDefault();
                 const email = loginForm.querySelector('input[type="email"]').value;
                 const name = email.split('@')[0];
-                userName.textContent = name.charAt(0).toUpperCase() + name.slice(1);
                 
-                // Simulate login
-                authModal.classList.add('hidden');
-                mainContent.classList.remove('hidden');
+                // For demo, set random user type
+                userType = Math.random() > 0.5 ? 'driver' : 'traveler';
+                currentUser = {
+                    name: name.charAt(0).toUpperCase() + name.slice(1),
+                    email: email,
+                    type: userType
+                };
                 
-                // Show success message
-                showNotification('¡Bienvenido a Uniride!', 'success');
+                // Redirect to dashboard
+                redirectToDashboard();
             });
             
             registerForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const name = registerForm.querySelector('input[type="text"]').value;
-                userName.textContent = name;
+                const email = registerForm.querySelector('input[type="email"]').value;
+                const selectedType = registerForm.querySelector('input[name="userType"]:checked');
                 
-                // Simulate registration
-                authModal.classList.add('hidden');
-                mainContent.classList.remove('hidden');
+                if (!selectedType) {
+                    showNotification('Por favor, selecciona si eres conductor o viajero', 'error');
+                    return;
+                }
+                
+                userType = selectedType.value;
+                currentUser = {
+                    name: name,
+                    email: email,
+                    type: userType
+                };
+                
+                // Redirect to dashboard
+                redirectToDashboard();
+            });
+            
+            function redirectToDashboard() {
+                // Update user info
+                userName.textContent = currentUser.name;
+                
+                // Update user type badge
+                const badgeText = userType === 'driver' ? 'Conductor' : 'Viajero';
+                const badgeClass = userType === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+                userTypeBadge.textContent = badgeText;
+                userTypeBadge.className = `px-2 py-1 rounded-full text-xs font-medium ${badgeClass}`;
+                
+                // Update welcome message
+                const welcomeText = userType === 'driver' 
+                    ? 'Publica tus viajes y conecta con viajeros para compartir gastos y experiencias.' 
+                    : 'Encuentra viajes compartidos, ahorra dinero y conoce gente nueva en el camino.';
+                welcomeMessage.textContent = welcomeText;
+                
+                // Switch pages
+                authPage.classList.add('hidden');
+                dashboardPage.classList.remove('hidden');
+                
+                // Initialize dashboard content
+                initializeDashboardContent();
                 
                 // Show success message
-                showNotification('¡Cuenta creada exitosamente!', 'success');
-            });
+                showNotification(`¡Bienvenido a Uniride, ${currentUser.name}!`, 'success');
+            }
             
             // Logout
             logoutBtn.addEventListener('click', () => {
-                mainContent.classList.add('hidden');
-                authModal.classList.remove('hidden');
+                dashboardPage.classList.add('hidden');
+                authPage.classList.remove('hidden');
                 showNotification('Sesión cerrada correctamente', 'info');
-            });
-            
-            // Seat counter
-            let seatCount = 4;
-            const seatDisplay = document.getElementById('seatCount');
-            
-            document.querySelectorAll('.seat-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (btn.dataset.action === 'increase' && seatCount < 8) {
-                        seatCount++;
-                    } else if (btn.dataset.action === 'decrease' && seatCount > 1) {
-                        seatCount--;
-                    }
-                    seatDisplay.textContent = seatCount;
-                });
-            });
-            
-            // Create trip form
-            document.getElementById('createTripForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                showNotification('¡Viaje publicado exitosamente!', 'success');
-                e.target.reset();
-                seatCount = 4;
-                seatDisplay.textContent = seatCount;
-            });
-            
-            // Trip filtering and search
-            const searchInput = document.getElementById('searchTrips');
-            const searchBtn = document.getElementById('searchBtn');
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            
-            function filterTrips() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
                 
-                const filtered = availableTrips.filter(trip => {
-                    const matchesSearch = trip.origin.toLowerCase().includes(searchTerm) || 
-                                         trip.destination.toLowerCase().includes(searchTerm);
-                    const matchesFilter = activeFilter === 'all' || trip.filter === activeFilter;
-                    return matchesSearch && matchesFilter;
-                });
+                // Reset forms
+                loginForm.reset();
+                registerForm.reset();
+            });
+            
+            // Dashboard functionality
+            function initializeDashboardContent() {
+                // Render trips list
+                const tripsList = document.getElementById('tripsList');
+                if (tripsList) {
+                    tripsList.innerHTML = renderTripCards(availableTrips);
+                }
                 
-                document.getElementById('tripsList').innerHTML = renderTripCards(filtered);
-                bindJoinTripEvents();
+                // Render recent trips
+                const recentTripsContainer = document.getElementById('recentTrips');
+                if (recentTripsContainer) {
+                    recentTripsContainer.innerHTML = renderRecentTrips(recentTrips);
+                }
+                
+                // Render travel photos
+                const photoGrid = document.getElementById('photoGrid');
+                if (photoGrid) {
+                    photoGrid.innerHTML = renderTravelPhotos(travelPhotos);
+                }
+                
+                // Render footer links
+                const driverLinksContainer = document.getElementById('driverLinks');
+                const travelerLinksContainer = document.getElementById('travelerLinks');
+                if (driverLinksContainer && travelerLinksContainer) {
+                    driverLinksContainer.innerHTML = renderFooterLinks(driverLinks);
+                    travelerLinksContainer.innerHTML = renderFooterLinks(travelerLinks);
+                }
+                
+                // Bind events
+                bindDashboardEvents();
             }
             
-            searchInput.addEventListener('input', filterTrips);
-            searchBtn.addEventListener('click', filterTrips);
-            
-            filterButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    filterButtons.forEach(b => b.classList.remove('bg-primary', 'text-white'));
-                    filterButtons.forEach(b => b.classList.add('bg-gray-100', 'text-gray-700'));
-                    btn.classList.remove('bg-gray-100', 'text-gray-700');
-                    btn.classList.add('bg-primary', 'text-white');
-                    filterTrips();
+            function bindDashboardEvents() {
+                // Seat counter
+                const seatDisplay = document.getElementById('seatCount');
+                document.querySelectorAll('.seat-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (btn.dataset.action === 'increase' && seatCount < 8) {
+                            seatCount++;
+                        } else if (btn.dataset.action === 'decrease' && seatCount > 1) {
+                            seatCount--;
+                        }
+                        seatDisplay.textContent = seatCount;
+                    });
                 });
-            });
+                
+                // Create trip form
+                const createTripForm = document.getElementById('createTripForm');
+                if (createTripForm) {
+                    createTripForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        showNotification('¡Viaje publicado exitosamente!', 'success');
+                        e.target.reset();
+                        seatCount = 4;
+                        if (seatDisplay) seatDisplay.textContent = seatCount;
+                    });
+                }
+                
+                // Trip filtering and search
+                const searchInput = document.getElementById('searchTrips');
+                const searchBtn = document.getElementById('searchBtn');
+                const filterButtons = document.querySelectorAll('.filter-btn');
+                
+                function filterTrips() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
+                    
+                    const filtered = availableTrips.filter(trip => {
+                        const matchesSearch = trip.origin.toLowerCase().includes(searchTerm) || 
+                                             trip.destination.toLowerCase().includes(searchTerm);
+                        const matchesFilter = activeFilter === 'all' || trip.filter === activeFilter;
+                        return matchesSearch && matchesFilter;
+                    });
+                    
+                    const tripsList = document.getElementById('tripsList');
+                    if (tripsList) {
+                        tripsList.innerHTML = renderTripCards(filtered);
+                        bindJoinTripEvents();
+                    }
+                }
+                
+                if (searchInput && searchBtn) {
+                    searchInput.addEventListener('input', filterTrips);
+                    searchBtn.addEventListener('click', filterTrips);
+                }
+                
+                if (filterButtons.length > 0) {
+                    filterButtons.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            filterButtons.forEach(b => b.classList.remove('bg-primary', 'text-white'));
+                            filterButtons.forEach(b => b.classList.add('bg-gray-100', 'text-gray-700'));
+                            btn.classList.remove('bg-gray-100', 'text-gray-700');
+                            btn.classList.add('bg-primary', 'text-white');
+                            filterTrips();
+                        });
+                    });
+                }
+                
+                // Join trip functionality
+                bindJoinTripEvents();
+                
+                // Photo upload modal
+                const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+                const uploadModal = document.getElementById('uploadModal');
+                const closeUploadModal = document.getElementById('closeUploadModal');
+                const cancelUpload = document.getElementById('cancelUpload');
+                const dropZone = document.getElementById('dropZone');
+                const photoInput = document.getElementById('photoInput');
+                const fileName = document.getElementById('fileName');
+                const uploadPhotoForm = document.getElementById('uploadPhotoForm');
+                
+                if (uploadPhotoBtn && uploadModal) {
+                    uploadPhotoBtn.addEventListener('click', () => {
+                        uploadModal.classList.remove('hidden');
+                    });
+                    
+                    closeUploadModal.addEventListener('click', () => {
+                        uploadModal.classList.add('hidden');
+                    });
+                    
+                    cancelUpload.addEventListener('click', () => {
+                        uploadModal.classList.add('hidden');
+                    });
+                    
+                    dropZone.addEventListener('click', () => {
+                        photoInput.click();
+                    });
+                    
+                    photoInput.addEventListener('change', (e) => {
+                        if (e.target.files.length > 0) {
+                            fileName.textContent = e.target.files[0].name;
+                            fileName.classList.remove('hidden');
+                        }
+                    });
+                    
+                    uploadPhotoForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        showNotification('¡Foto publicada exitosamente!', 'success');
+                        uploadModal.classList.add('hidden');
+                        uploadPhotoForm.reset();
+                        fileName.classList.add('hidden');
+                    });
+                }
+                
+                // Like photo functionality
+                document.querySelectorAll('.like-photo-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const icon = this.querySelector('i');
+                        if (icon.classList.contains('far')) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas', 'text-red-400');
+                            showNotification('¡Foto añadida a favoritos!', 'success');
+                        } else {
+                            icon.classList.remove('fas', 'text-red-400');
+                            icon.classList.add('far');
+                            showNotification('Foto removida de favoritos', 'info');
+                        }
+                    });
+                });
+                
+                // Load more photos
+                const loadMorePhotos = document.getElementById('loadMorePhotos');
+                if (loadMorePhotos) {
+                    loadMorePhotos.addEventListener('click', () => {
+                        showNotification('Cargando más fotos...', 'info');
+                        // In a real app, this would load more photos from an API
+                    });
+                }
+            }
             
-            // Join trip functionality
             function bindJoinTripEvents() {
                 document.querySelectorAll('.join-trip-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
@@ -687,20 +1125,29 @@
                         const trip = availableTrips.find(t => t.id == tripId);
                         if (trip && trip.seats > 0) {
                             trip.seats--;
-                            filterTrips();
+                            
+                            // Update trips list
+                            const tripsList = document.getElementById('tripsList');
+                            if (tripsList) {
+                                const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
+                                const searchTerm = document.getElementById('searchTrips')?.value.toLowerCase() || '';
+                                
+                                const filtered = availableTrips.filter(t => {
+                                    const matchesSearch = t.origin.toLowerCase().includes(searchTerm) || 
+                                                         t.destination.toLowerCase().includes(searchTerm);
+                                    const matchesFilter = activeFilter === 'all' || t.filter === activeFilter;
+                                    return matchesSearch && matchesFilter;
+                                });
+                                
+                                tripsList.innerHTML = renderTripCards(filtered);
+                                bindJoinTripEvents();
+                            }
+                            
                             showNotification(`¡Te has unido al viaje de ${trip.origin} a ${trip.destination}!`, 'success');
                         }
                     });
                 });
             }
-            
-            bindJoinTripEvents();
-            
-            // Mobile menu
-            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-                const mobileSocial = document.getElementById('mobileSocialLinks');
-                mobileSocial.classList.toggle('hidden');
-            });
             
             // Notification function
             function showNotification(message, type) {
