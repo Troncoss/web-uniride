@@ -61,10 +61,10 @@
                         <div class="hidden md:flex items-center space-x-3 text-gray-600">
                             <span class="text-sm">Contáctanos en:</span>
                             <div class="flex items-center space-x-3">
-                                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#000000">
+                                <a href="https://x.com/_UniRide_" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#000000">
                                     <i class="fa-brands fa-x-twitter"></i>
                                 </a>
-                                <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#E1306C">
+                                <a href="https://www.instagram.com/_.uniride._/" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#E1306C">
                                     <i class="fab fa-instagram"></i>
                                 </a>
                             </div>
@@ -80,10 +80,10 @@
                 <div class="md:hidden mt-4 flex items-center justify-center space-x-6 text-gray-600">
                     <span class="text-sm">Contáctanos en:</span>
                     <div class="flex items-center space-x-4">
-                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#000000">
+                        <a href="https://x.com/_UniRide_" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#000000">
                             <i class="fa-brands fa-x-twitter"></i>
                         </a>
-                        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#E1306C">
+                        <a href="https://www.instagram.com/_.uniride._/" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#E1306C">
                             <i class="fab fa-instagram"></i>
                         </a>
                     </div>
@@ -283,11 +283,28 @@
                 </div>
             </div>
             
-            <!-- Recent Trips Section -->
-            <div class="max-w-6xl mx-auto">
+            <!-- My Trips Section -->
+            <div class="max-w-6xl mx-auto mb-16" id="myTripsSectionContainer" style="display: none;">
                 <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-2xl font-bold text-gray-800">Tus Viajes Recientes</h3>
-                    <a href="#" class="text-primary hover:underline font-medium">Ver todos</a>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-suitcase-rolling text-green-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Mis Viajes Apuntados</h3>
+                            <p class="text-gray-600">Viajes a los que vas a asistir</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="myTripsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- My trips will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Recent Trips Section -->
+            <div class="max-w-6xl mx-auto mb-16">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800">Próximos Viajes Añadidos</h3>
                 </div>
                 
                 <div id="recentTrips" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -339,10 +356,10 @@
                                 <span>+1 (555) 123-4567</span>
                             </div>
                             <div class="flex items-center space-x-4 mt-4">
-                                <a href="#" class="hover:opacity-80 transition duration-200" style="color:#ffffff">
+                                <a href="https://x.com/_UniRide_" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#ffffff">
                                     <i class="fa-brands fa-x-twitter"></i>
                                 </a>
-                                <a href="#" class="hover:opacity-80 transition duration-200" style="color:#E1306C">
+                                <a href="https://www.instagram.com/_.uniride._/" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-200" style="color:#E1306C">
                                     <i class="fab fa-instagram"></i>
                                 </a>
                             </div>
@@ -392,73 +409,7 @@
             { "id": "nearby", "label": "Cercanos" }
         ];
 
-        const availableTrips = [
-            { 
-                "id": 1, 
-                "origin": "Centro (Tendillas)", 
-                "destination": "Campus de Rabanales", 
-                "date": "2026-05-20", 
-                "time": "08:00", 
-                "seats": 3, 
-                "price": 2.50, 
-                "driver": "Carlos M.", 
-                "rating": 4.8,
-                "car": "Toyota Prius",
-                "filter": "today"
-            },
-            { 
-                "id": 2, 
-                "origin": "Campus de Rabanales", 
-                "destination": "Barrio del Brillante", 
-                "date": "2026-05-21", 
-                "time": "14:30", 
-                "seats": 2, 
-                "price": 2.00, 
-                "driver": "Ana R.", 
-                "rating": 4.9,
-                "car": "Volkswagen Polo",
-                "filter": "tomorrow"
-            },
-            { 
-                "id": 3, 
-                "origin": "El Arenal (Córdoba)", 
-                "destination": "Campus de Rabanales", 
-                "date": "2026-05-24", 
-                "time": "07:45", 
-                "seats": 4, 
-                "price": 2.00, 
-                "driver": "Miguel T.", 
-                "rating": 4.7,
-                "car": "Ford Focus",
-                "filter": "weekend"
-            },
-            { 
-                "id": 4, 
-                "origin": "Campus de Rabanales", 
-                "destination": "Parque Figueroa", 
-                "date": "2026-05-20", 
-                "time": "15:15", 
-                "seats": 1, 
-                "price": 1.50, 
-                "driver": "Laura G.", 
-                "rating": 4.5,
-                "car": "Hyundai i10",
-                "filter": "cheap"
-            },
-            { 
-                "id": 5, 
-                "origin": "Residencias UCO", 
-                "destination": "Campus de Rabanales", 
-                "date": "2026-05-21", 
-                "time": "08:30", 
-                "seats": 3, 
-                "price": 1.00, 
-                "driver": "David L.", 
-                "rating": 4.6,
-                "car": "Seat Ibiza",
-                "filter": "nearby"
-            }
-        ];
+        let availableTrips = [];
 
         const recentTrips = [
             { 
@@ -487,80 +438,7 @@
             }
         ];
 
-        const travelPhotos = [
-            { 
-                "id": 1, 
-                "title": "Camino a la uni 🚗", 
-                "description": "Empezando la semana con el mejor equipo rumbo a la universidad", 
-                "route": "Centro - Universidad", 
-                "user": "Carlos M.", 
-                "userType": "driver",
-                "likes": 42,
-                "comments": 8,
-                "image": "uni_trip_1.png",
-                "date": "2024-03-10"
-            },
-            { 
-                "id": 2, 
-                "title": "Vista del campus", 
-                "description": "Llegando al campus después de 20 min de trayecto compartido", 
-                "route": "Norte - Campus universitario", 
-                "user": "Ana R.", 
-                "userType": "traveler",
-                "likes": 28,
-                "comments": 5,
-                "image": "uni_trip_2.png",
-                "date": "2024-03-08"
-            },
-            { 
-                "id": 3, 
-                "title": "Llegada perfecta", 
-                "description": "A tiempo para la primera clase gracias al viaje compartido", 
-                "route": "Sur - Facultad de Ingeniería", 
-                "user": "Miguel T.", 
-                "userType": "driver",
-                "likes": 56,
-                "comments": 12,
-                "image": "uni_trip_3.png",
-                "date": "2024-03-05"
-            },
-            { 
-                "id": 4, 
-                "title": "Ruta al campus", 
-                "description": "El paisaje del trayecto matutino hace que el día empiece genial", 
-                "route": "Este - Universidad Central", 
-                "user": "Laura G.", 
-                "userType": "traveler",
-                "likes": 31,
-                "comments": 6,
-                "image": "uni_trip_4.png",
-                "date": "2024-03-03"
-            },
-            { 
-                "id": 5, 
-                "title": "¡Hasta mañana!", 
-                "description": "Despidiéndonos después de otro día en la universidad", 
-                "route": "Universidad - Residencias", 
-                "user": "David L.", 
-                "userType": "driver",
-                "likes": 67,
-                "comments": 15,
-                "image": "uni_trip_5.png",
-                "date": "2024-03-01"
-            },
-            { 
-                "id": 6, 
-                "title": "Parking universitario", 
-                "description": "El punto de encuentro de nuestro grupo de viaje compartido", 
-                "route": "Oeste - Campus Norte", 
-                "user": "Sofía P.", 
-                "userType": "traveler",
-                "likes": 39,
-                "comments": 9,
-                "image": "uni_trip_6.png",
-                "date": "2024-02-28"
-            }
-        ];
+        let travelPhotos = [];
 
         const driverLinks = [
             { "label": "Cómo publicar un viaje", "url": "informacion.html#publicar" },
@@ -585,7 +463,7 @@
             ).join("");
         }
 
-        function renderTripCards(items) {
+        function renderTripCards(items, hideJoinBtn = false) {
             if (items.length === 0) {
                 return `<div class="text-center py-8 text-gray-500">
                     <i class="fas fa-search text-4xl mb-4"></i>
@@ -600,17 +478,13 @@
                             <h4 class="font-bold text-lg text-gray-800">${trip.origin} → ${trip.destination}</h4>
                             <p class="text-gray-600 text-sm">${trip.date} a las ${trip.time}</p>
                         </div>
-                        <span class="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">$${trip.price.toFixed(2)}</span>
+                        <span class="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">${trip.price.toFixed(2)}€</span>
                     </div>
                     
                     <div class="space-y-3 mb-4">
                         <div class="flex items-center text-gray-700">
                             <i class="fas fa-user text-gray-400 mr-3"></i>
-                            <span>Conductor: ${trip.driver}</span>
-                            <div class="ml-2 flex items-center">
-                                <i class="fas fa-star text-yellow-400 mr-1"></i>
-                                <span>${trip.rating}</span>
-                            </div>
+                            <span>Conductor: ${trip.driver_name || trip.driver}</span>
                         </div>
                         <div class="flex items-center text-gray-700">
                             <i class="fas fa-car text-gray-400 mr-3"></i>
@@ -622,9 +496,9 @@
                         </div>
                     </div>
                     
-                    <button class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 flex items-center justify-center join-trip-btn" data-trip-id="${trip.id}">
+                    ${hideJoinBtn ? '' : `<button class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 flex items-center justify-center join-trip-btn" data-trip-id="${trip.id}">
                         <i class="fas fa-check-circle mr-2"></i>Unirse al Viaje
-                    </button>
+                    </button>`}
                 </div>
             `).join("");
         }
@@ -668,39 +542,42 @@
         }
 
         function renderTravelPhotos(items) {
+            if (items.length === 0) {
+                return '<div class="col-span-3 text-center py-8 text-gray-500"><i class="fas fa-camera text-4xl mb-4"></i><p>Aún no hay fotos. ¡Sé el primero en subir una!</p></div>';
+            }
             return items.map(photo => `
                 <div class="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition duration-200">
                     <div class="relative">
                         <img src="${photo.image}" alt="${photo.title}" class="w-full h-48 object-cover" loading="lazy">
                         <div class="absolute top-3 right-3">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium ${photo.userType === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
-                                ${photo.userType === 'driver' ? 'Conductor' : 'Viajero'}
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${(photo.user_type || photo.userType) === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                                ${(photo.user_type || photo.userType) === 'driver' ? 'Conductor' : 'Viajero'}
                             </span>
                         </div>
                     </div>
                     <div class="p-4">
                         <div class="flex items-center justify-between mb-2">
                             <h4 class="font-bold text-gray-800">${photo.title}</h4>
-                            <span class="text-gray-500 text-sm">${photo.date}</span>
+                            <span class="text-gray-500 text-sm">${photo.created_at ? photo.created_at.split('T')[0] : (photo.date || '')}</span>
                         </div>
-                        <p class="text-gray-600 text-sm mb-3">${photo.description}</p>
+                        <p class="text-gray-600 text-sm mb-3">${photo.description || ''}</p>
                         <div class="flex items-center text-gray-700 text-sm mb-4">
                             <i class="fas fa-route text-gray-400 mr-2"></i>
-                            <span>${photo.route}</span>
+                            <span>${photo.route || ''}</span>
                         </div>
                         <div class="flex items-center justify-between text-gray-600 text-sm">
                             <div class="flex items-center space-x-4">
                                 <div class="flex items-center">
                                     <i class="fas fa-user text-gray-400 mr-1"></i>
-                                    <span>${photo.user}</span>
+                                    <span>${photo.user_name || photo.user}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-heart text-red-400 mr-1"></i>
-                                    <span>${photo.likes}</span>
+                                    <span>${photo.likes || 0}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-comment text-gray-400 mr-1"></i>
-                                    <span>${photo.comments}</span>
+                                    <span>${photo.comments || 0}</span>
                                 </div>
                             </div>
                             <button class="like-photo-btn text-gray-400 hover:text-red-400 transition duration-200" data-photo-id="${photo.id}">
@@ -794,23 +671,69 @@
             
             // Dashboard functionality
             function initializeDashboardContent() {
-                // Render trips list
-                const tripsList = document.getElementById('tripsList');
-                if (tripsList) {
-                    tripsList.innerHTML = renderTripCards(availableTrips);
-                }
+                // Fetch trips from database
+                fetch('/api/trips')
+                    .then(res => res.json())
+                    .then(trips => {
+                        availableTrips = trips;
+                        const tripsList = document.getElementById('tripsList');
+                        if (tripsList) {
+                            tripsList.innerHTML = renderTripCards(availableTrips);
+                        }
+                        // Load "Mis Viajes"
+                        fetch('/api/trips/joined/' + currentUser.id)
+                            .then(res => res.json())
+                            .then(joined => {
+                                if (joined.length > 0) {
+                                    document.getElementById('myTripsSectionContainer').style.display = 'block';
+                                    const myTripsList = document.getElementById('myTripsList');
+                                    if (myTripsList) {
+                                        myTripsList.innerHTML = renderTripCards(joined, true); // true = hide join button
+                                    }
+                                }
+                            });
+
+                        // Set minimum date for trip creation to today
+                        const dateInput = document.querySelector('input[type="date"]');
+                        if (dateInput) {
+                            const today = new Date().toISOString().split('T')[0];
+                            dateInput.setAttribute('min', today);
+                        }
+                    })
+                    .catch(() => {
+                        // If API fails, show empty state
+                        const tripsList = document.getElementById('tripsList');
+                        if (tripsList) {
+                            tripsList.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-database text-4xl mb-4"></i><p>No se pudieron cargar los viajes del servidor.</p></div>';
+                        }
+                    });
                 
                 // Render recent trips
                 const recentTripsContainer = document.getElementById('recentTrips');
                 if (recentTripsContainer) {
-                    recentTripsContainer.innerHTML = renderRecentTrips(recentTrips);
+                    // Show 3 first upcoming trips
+                    setTimeout(() => {
+                        recentTripsContainer.innerHTML = renderTripCards(availableTrips.slice(0, 3));
+                        bindJoinTripEvents();
+                    }, 500); // Give it time to load availableTrips
                 }
                 
-                // Render travel photos
-                const photoGrid = document.getElementById('photoGrid');
-                if (photoGrid) {
-                    photoGrid.innerHTML = renderTravelPhotos(travelPhotos);
-                }
+                // Fetch photos from database
+                fetch('/api/photos')
+                    .then(res => res.json())
+                    .then(photos => {
+                        travelPhotos = photos;
+                        const photoGrid = document.getElementById('photoGrid');
+                        if (photoGrid) {
+                            photoGrid.innerHTML = renderTravelPhotos(travelPhotos);
+                        }
+                    })
+                    .catch(() => {
+                        const photoGrid = document.getElementById('photoGrid');
+                        if (photoGrid) {
+                            photoGrid.innerHTML = '<div class="col-span-3 text-center py-8 text-gray-500"><i class="fas fa-camera text-4xl mb-4"></i><p>No se pudieron cargar las fotos.</p></div>';
+                        }
+                    });
                 
                 // Render footer links
                 const driverLinksContainer = document.getElementById('driverLinks');
@@ -841,12 +764,50 @@
                 // Create trip form
                 const createTripForm = document.getElementById('createTripForm');
                 if (createTripForm) {
-                    createTripForm.addEventListener('submit', (e) => {
+                    createTripForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        showNotification('¡Viaje publicado exitosamente!', 'success');
-                        e.target.reset();
-                        seatCount = 4;
-                        if (seatDisplay) seatDisplay.textContent = seatCount;
+                        const inputs = createTripForm.querySelectorAll('input, textarea');
+                        const origin = inputs[0].value;
+                        const destination = inputs[1].value;
+                        const date = inputs[2].value;
+                        const time = inputs[3].value;
+                        const price = inputs[4].value;
+                        const description = inputs[5] ? inputs[5].value : '';
+
+                        try {
+                            const response = await fetch('/api/trips', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    origin, destination, date, time,
+                                    seats: seatCount,
+                                    price: parseFloat(price),
+                                    car: '',
+                                    description,
+                                    driver_id: currentUser.id,
+                                    driver_name: currentUser.name
+                                })
+                            });
+                            if (response.ok) {
+                                showNotification('¡Viaje publicado exitosamente!', 'success');
+                                e.target.reset();
+                                seatCount = 4;
+                                if (seatDisplay) seatDisplay.textContent = seatCount;
+                                // Reload trips from database
+                                const res = await fetch('/api/trips');
+                                availableTrips = await res.json();
+                                const tripsList = document.getElementById('tripsList');
+                                if (tripsList) {
+                                    tripsList.innerHTML = renderTripCards(availableTrips);
+                                    bindJoinTripEvents();
+                                }
+                            } else {
+                                const data = await response.json();
+                                showNotification(data.error || 'Error al crear viaje', 'error');
+                            }
+                        } catch (err) {
+                            showNotification('Error de conexión con el servidor', 'error');
+                        }
                     });
                 }
                 
@@ -927,95 +888,108 @@
                         }
                     });
                     
-                    uploadPhotoForm.addEventListener('submit', (e) => {
+                    uploadPhotoForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        showNotification('¡Foto publicada exitosamente!', 'success');
-                        uploadModal.classList.add('hidden');
-                        uploadPhotoForm.reset();
-                        fileName.classList.add('hidden');
-                    });
-                }
-                
-                // Like photo functionality
-                document.querySelectorAll('.like-photo-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const icon = this.querySelector('i');
-                        if (icon.classList.contains('far')) {
-                            icon.classList.remove('far');
-                            icon.classList.add('fas', 'text-red-400');
-                            showNotification('¡Foto añadida a favoritos!', 'success');
-                        } else {
-                            icon.classList.remove('fas', 'text-red-400');
-                            icon.classList.add('far');
-                            showNotification('Foto removida de favoritos', 'info');
+                        const inputs = uploadPhotoForm.querySelectorAll('input[type="text"], textarea');
+                        const title = inputs[0].value;
+                        const description = inputs[1] ? inputs[1].value : '';
+                        const route = inputs[2] ? inputs[2].value : '';
+                        const file = photoInput.files[0];
+
+                        if (!file) {
+                            showNotification('Selecciona una foto para subir', 'error');
+                            return;
                         }
-                    });
-                });
-                
-                // Load more photos
-                const loadMorePhotos = document.getElementById('loadMorePhotos');
-                if (loadMorePhotos) {
-                    loadMorePhotos.addEventListener('click', () => {
-                        const extraPhotos = [
-                            { "id": 7, "title": "Salida matinal a Rabanales", "description": "Arrancando el lunes con buen rollo desde el Brillante hasta la universidad", "route": "Barrio del Brillante - Campus Rabanales", "user": "Elena V.", "userType": "traveler", "likes": 22, "comments": 4, "image": "uni_trip_4.png", "date": "2026-05-12" },
-                            { "id": 8, "title": "Vuelta a casa", "description": "Regresando al centro después de un día largo de clases en la UCO", "route": "Campus Rabanales - Centro (Tendillas)", "user": "Pablo R.", "userType": "driver", "likes": 18, "comments": 3, "image": "uni_trip_5.png", "date": "2026-05-09" },
-                            { "id": 9, "title": "Preparando el examen", "description": "Yendo juntos a la biblioteca de Rabanales antes del parcial", "route": "Parque Figueroa - Campus Rabanales", "user": "Lucía M.", "userType": "traveler", "likes": 35, "comments": 7, "image": "uni_trip_6.png", "date": "2026-05-06" }
-                        ];
-                        const photoGrid = document.getElementById('photoGrid');
-                        if (photoGrid) {
-                            photoGrid.insertAdjacentHTML('beforeend', renderTravelPhotos(extraPhotos));
-                            document.querySelectorAll('.like-photo-btn').forEach(btn => {
-                                btn.removeEventListener('click', likeBtnHandler);
-                                btn.addEventListener('click', likeBtnHandler);
+
+                        const formData = new FormData();
+                        formData.append('photo', file);
+                        formData.append('title', title);
+                        formData.append('description', description);
+                        formData.append('route', route);
+                        formData.append('user_id', currentUser.id);
+                        formData.append('user_name', currentUser.name);
+                        formData.append('user_type', userType);
+
+                        try {
+                            const response = await fetch('/api/photos', {
+                                method: 'POST',
+                                body: formData
                             });
-                            showNotification('¡3 fotos más cargadas!', 'success');
-                            loadMorePhotos.disabled = true;
-                            loadMorePhotos.innerHTML = '<i class="fas fa-check mr-2"></i>No hay más fotos';
-                            loadMorePhotos.classList.add('opacity-50', 'cursor-not-allowed');
+                            if (response.ok) {
+                                showNotification('¡Foto publicada exitosamente!', 'success');
+                                uploadModal.classList.add('hidden');
+                                uploadPhotoForm.reset();
+                                fileName.classList.add('hidden');
+                                // Reload photos from database
+                                const res = await fetch('/api/photos');
+                                travelPhotos = await res.json();
+                                const photoGrid = document.getElementById('photoGrid');
+                                if (photoGrid) photoGrid.innerHTML = renderTravelPhotos(travelPhotos);
+                            } else {
+                                const data = await response.json();
+                                showNotification(data.error || 'Error al subir la foto', 'error');
+                            }
+                        } catch (err) {
+                            showNotification('Error de conexión con el servidor', 'error');
                         }
                     });
                 }
-            }
-            
+                
             function bindJoinTripEvents() {
                 document.querySelectorAll('.join-trip-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
+                    btn.addEventListener('click', async function() {
                         const tripId = this.dataset.tripId;
                         
-                        // Prevent joining the same trip twice
+                        // Prevent joining the same trip twice visually
                         if (joinedTrips.has(tripId)) {
                             showNotification('Ya te has unido a este viaje anteriormente', 'error');
                             return;
                         }
-                        
-                        const trip = availableTrips.find(t => t.id == tripId);
-                        if (trip && trip.seats > 0) {
-                            trip.seats--;
-                            joinedTrips.add(tripId);
+
+                        try {
+                            const response = await fetch('/api/trips/' + tripId + '/join', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ user_id: currentUser.id })
+                            });
                             
-                            // Update trips list
-                            const tripsList = document.getElementById('tripsList');
-                            if (tripsList) {
-                                const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
-                                const searchTerm = document.getElementById('searchTrips')?.value.toLowerCase() || '';
+                            const data = await response.json();
+                            
+                            if (response.ok) {
+                                joinedTrips.add(tripId);
+                                showNotification(data.message, 'success');
                                 
-                                const filtered = availableTrips.filter(t => {
-                                    const matchesSearch = t.origin.toLowerCase().includes(searchTerm) || 
-                                                         t.destination.toLowerCase().includes(searchTerm);
-                                    const matchesFilter = activeFilter === 'all' || t.filter === activeFilter;
-                                    return matchesSearch && matchesFilter;
+                                // Refresh everything
+                                fetch('/api/trips').then(res => res.json()).then(trips => {
+                                    availableTrips = trips;
+                                    const tripsList = document.getElementById('tripsList');
+                                    if (tripsList) {
+                                        const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
+                                        const searchTerm = document.getElementById('searchTrips')?.value.toLowerCase() || '';
+                                        const filtered = availableTrips.filter(t => {
+                                            const matchesSearch = t.origin.toLowerCase().includes(searchTerm) || 
+                                                                 t.destination.toLowerCase().includes(searchTerm);
+                                            const matchesFilter = activeFilter === 'all' || t.filter === activeFilter;
+                                            return matchesSearch && matchesFilter;
+                                        });
+                                        tripsList.innerHTML = renderTripCards(filtered);
+                                        bindJoinTripEvents();
+                                    }
                                 });
-                                
-                                tripsList.innerHTML = renderTripCards(filtered);
-                                bindJoinTripEvents();
-                                
-                                // Mark already-joined buttons
-                                markJoinedButtons();
+
+                                fetch('/api/trips/joined/' + currentUser.id).then(res => res.json()).then(joined => {
+                                    if (joined.length > 0) {
+                                        document.getElementById('myTripsSectionContainer').style.display = 'block';
+                                        const myTripsList = document.getElementById('myTripsList');
+                                        if (myTripsList) myTripsList.innerHTML = renderTripCards(joined, true);
+                                    }
+                                });
+
+                            } else {
+                                showNotification(data.error || 'Error al unirse', 'error');
                             }
-                            
-                            showNotification(`¡Te has unido al viaje de ${trip.origin} a ${trip.destination}!`, 'success');
-                        } else if (trip && trip.seats === 0) {
-                            showNotification('Este viaje ya no tiene plazas disponibles', 'error');
+                        } catch (err) {
+                            showNotification('Error de red al intentar unirse', 'error');
                         }
                     });
                 });
@@ -1033,17 +1007,43 @@
                 });
             }
 
+            // Like photo functionality via API
+            document.querySelectorAll('.like-photo-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const icon = this.querySelector('i');
+                    const photoId = this.dataset.photoId;
+                    
+                    if (icon.classList.contains('far')) {
+                        // Optimistic UI update
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'text-red-400');
+                        const countSpan = this.parentElement.querySelector('.fa-heart.text-red-400').nextElementSibling;
+                        if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+                        
+                        try {
+                            const response = await fetch('/api/photos/' + photoId + '/like', { method: 'POST' });
+                            if (response.ok) {
+                                showNotification('¡Foto añadida a favoritos!', 'success');
+                                const data = await response.json();
+                                if (countSpan) countSpan.textContent = data.likes;
+                            } else {
+                                // Revert
+                                icon.classList.remove('fas', 'text-red-400');
+                                icon.classList.add('far');
+                                if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                            }
+                        } catch(err) {
+                            // Revert
+                            icon.classList.remove('fas', 'text-red-400');
+                            icon.classList.add('far');
+                            if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                        }
+                    }
+                });
+            });
+
             function likeBtnHandler() {
-                const icon = this.querySelector('i');
-                if (icon.classList.contains('far')) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas', 'text-red-400');
-                    showNotification('¡Foto añadida a favoritos!', 'success');
-                } else {
-                    icon.classList.remove('fas', 'text-red-400');
-                    icon.classList.add('far');
-                    showNotification('Foto removida de favoritos', 'info');
-                }
+                // Not used anymore as it's handled above
             }
             
             // Notification function
