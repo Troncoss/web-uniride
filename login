@@ -172,10 +172,10 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-6">
-                        <a href="#" class="transition duration-200 hover:opacity-80" style="color:#000000">
+                        <a href="https://x.com/_UniRide_" target="_blank" rel="noopener noreferrer" class="transition duration-200 hover:opacity-80" style="color:#000000">
                             <i class="fa-brands fa-x-twitter text-xl"></i>
                         </a>
-                        <a href="#" class="transition duration-200 hover:opacity-80" style="color:#E1306C">
+                        <a href="https://www.instagram.com/_.uniride._/" target="_blank" rel="noopener noreferrer" class="transition duration-200 hover:opacity-80" style="color:#E1306C">
                             <i class="fab fa-instagram text-xl"></i>
                         </a>
                     </div>
@@ -249,21 +249,34 @@
             });
 
             // ── Login ──────────────────────────────────────────────────────
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = document.getElementById('loginEmail').value.trim();
-                const name  = email.split('@')[0];
-                const user  = {
-                    name:  name.charAt(0).toUpperCase() + name.slice(1),
-                    email: email,
-                    type:  'traveler'   // login demo → viajero por defecto
-                };
-                localStorage.setItem('uniride_user', JSON.stringify(user));
-                window.location.href = 'index.html';
+                const password = document.getElementById('loginPassword').value;
+
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        localStorage.setItem('uniride_user', JSON.stringify(data.user));
+                        window.location.href = 'index.html';
+                    } else {
+                        showNotification(data.error || 'Error al iniciar sesión', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Error de conexión con el servidor', 'error');
+                    console.error(error);
+                }
             });
 
             // ── Register ───────────────────────────────────────────────────
-            registerForm.addEventListener('submit', (e) => {
+            registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const name            = document.getElementById('regName').value.trim();
                 const email           = document.getElementById('regEmail').value.trim();
@@ -280,9 +293,30 @@
                     return;
                 }
 
-                const user = { name, email, type: selectedType.value };
-                localStorage.setItem('uniride_user', JSON.stringify(user));
-                window.location.href = 'index.html';
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name,
+                            email,
+                            password,
+                            type: selectedType.value
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        localStorage.setItem('uniride_user', JSON.stringify(data.user));
+                        window.location.href = 'index.html';
+                    } else {
+                        showNotification(data.error || 'Error al registrar', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Error de conexión con el servidor', 'error');
+                    console.error(error);
+                }
             });
 
             // ── Forgot password ────────────────────────────────────────────
