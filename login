@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniride - Iniciar Sesión</title>
+    <meta name="description" content="Accede a Uniride, la plataforma de viajes compartidos universitarios en Córdoba">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gray-50 font-sans">
+
+    <!-- Login/Register Page -->
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex justify-center">
+                    <div class="text-center">
+                        <img src="uniride_logo.png" alt="Uniride" class="h-24 mx-auto mb-2"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                        <div class="hidden">
+                            <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <span class="text-white font-bold text-3xl">U</span>
+                            </div>
+                            <h1 class="text-3xl font-bold text-gray-800">Uniride</h1>
+                        </div>
+                        <p class="text-gray-600 mt-1">Conectando viajes, compartiendo experiencias</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Auth Content -->
+        <main class="flex-1 flex items-center justify-center py-12">
+            <div class="max-w-md w-full px-4">
+                <div id="authTabs" class="flex border-b mb-8">
+                    <button id="loginTab" class="flex-1 py-4 font-medium text-primary border-b-2 border-primary text-lg">Iniciar Sesión</button>
+                    <button id="registerTab" class="flex-1 py-4 font-medium text-gray-500 text-lg">Registrarse</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="loginEmail" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                        <input type="password" id="loginPassword" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="remember" class="h-4 w-4 text-primary rounded">
+                            <label for="remember" class="ml-2 text-sm text-gray-600">Recuérdame</label>
+                        </div>
+                        <button type="button" id="forgotPasswordBtn"
+                                class="text-sm text-primary hover:underline bg-transparent border-0 cursor-pointer p-0">
+                            ¿Olvidaste tu contraseña?
+                        </button>
+                    </div>
+                    <div class="mt-8">
+                        <button type="submit"
+                                class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition duration-200 text-lg">
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                        <input type="text" id="regName" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="regEmail" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                        <input type="password" id="regPassword" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                        <input type="password" id="regPasswordConfirm" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">¿Cómo usarás Uniride?</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <input type="radio" id="driver" name="userType" value="driver" class="hidden peer">
+                                <label for="driver"
+                                       class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer text-center peer-checked:border-primary peer-checked:bg-blue-50 hover:border-gray-300 transition duration-200">
+                                    <i class="fas fa-car text-2xl text-primary mb-2 block"></i>
+                                    <div class="font-medium">Conductor</div>
+                                    <div class="text-sm text-gray-600 mt-1">Crear viajes</div>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="radio" id="traveler" name="userType" value="traveler" class="hidden peer">
+                                <label for="traveler"
+                                       class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer text-center peer-checked:border-primary peer-checked:bg-blue-50 hover:border-gray-300 transition duration-200">
+                                    <i class="fas fa-users text-2xl text-accent mb-2 block"></i>
+                                    <div class="font-medium">Viajero</div>
+                                    <div class="text-sm text-gray-600 mt-1">Unirse a viajes</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="terms" required class="h-4 w-4 text-primary rounded">
+                        <label for="terms" class="ml-2 text-sm text-gray-600">
+                            Acepto los
+                            <button type="button" id="termsBtn"
+                                    class="text-primary hover:underline bg-transparent border-0 cursor-pointer p-0 font-normal">
+                                términos y condiciones
+                            </button>
+                        </label>
+                    </div>
+                    <div class="mt-8">
+                        <button type="submit"
+                                class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 text-lg">
+                            Crear Cuenta
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 pt-8 border-t text-center">
+                    <p class="text-sm text-gray-600">Puedes cambiar entre conductor y viajero en cualquier momento desde tu perfil.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t mt-12">
+            <div class="container mx-auto px-4 py-8">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold">U</span>
+                            </div>
+                            <span class="text-lg font-bold text-gray-800">Uniride</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <a href="#" class="transition duration-200 hover:opacity-80" style="color:#000000">
+                            <i class="fa-brands fa-x-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="transition duration-200 hover:opacity-80" style="color:#E1306C">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="text-center text-gray-500 text-sm mt-6">
+                    <p>&copy; 2026 Uniride. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Términos y Condiciones</h3>
+                <button id="closeTermsModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="text-gray-700 text-sm space-y-4">
+                <p><strong>1. Uso de la plataforma.</strong> Uniride es una plataforma de intermediación para compartir viajes entre conductores y viajeros universitarios en Córdoba. El uso implica la aceptación de estos términos.</p>
+                <p><strong>2. Registro.</strong> Para usar Uniride debes registrarte con datos verídicos. Eres responsable de mantener la confidencialidad de tu cuenta.</p>
+                <p><strong>3. Seguridad.</strong> Los conductores deben poseer carnet de conducir vigente y seguro del vehículo en regla. Uniride no se hace responsable de los daños que puedan ocurrir durante el viaje.</p>
+                <p><strong>4. Pagos.</strong> Los pagos se realizan directamente entre conductor y viajero. Uniride no gestiona ni procesa pagos.</p>
+                <p><strong>5. Cancelaciones.</strong> Tanto conductores como viajeros deben avisar con suficiente antelación en caso de cancelación.</p>
+                <p><strong>6. Privacidad.</strong> Tus datos personales serán tratados conforme a nuestra política de privacidad y la normativa vigente de protección de datos.</p>
+                <p><strong>7. Modificaciones.</strong> Uniride se reserva el derecho de modificar estos términos en cualquier momento, notificando a los usuarios con antelación.</p>
+                <p class="text-gray-500 mt-4">Última actualización: mayo 2026</p>
+            </div>
+            <button id="acceptTermsBtn" class="w-full mt-6 bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition duration-200">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification container -->
+    <div id="notifContainer"></div>
+
+    <script>
+        // If already logged in, go straight to dashboard
+        (function() {
+            if (localStorage.getItem('uniride_user')) {
+                window.location.replace('index.html');
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginTab     = document.getElementById('loginTab');
+            const registerTab  = document.getElementById('registerTab');
+            const loginForm    = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            // ── Tab switching ──────────────────────────────────────────────
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('border-b-2', 'border-primary', 'text-primary');
+                loginTab.classList.remove('text-gray-500');
+                registerTab.classList.remove('border-b-2', 'border-primary', 'text-primary');
+                registerTab.classList.add('text-gray-500');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            });
+
+            registerTab.addEventListener('click', () => {
+                registerTab.classList.add('border-b-2', 'border-primary', 'text-primary');
+                registerTab.classList.remove('text-gray-500');
+                loginTab.classList.remove('border-b-2', 'border-primary', 'text-primary');
+                loginTab.classList.add('text-gray-500');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            });
+
+            // ── Login ──────────────────────────────────────────────────────
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value.trim();
+                const name  = email.split('@')[0];
+                const user  = {
+                    name:  name.charAt(0).toUpperCase() + name.slice(1),
+                    email: email,
+                    type:  'traveler'   // login demo → viajero por defecto
+                };
+                localStorage.setItem('uniride_user', JSON.stringify(user));
+                window.location.href = 'index.html';
+            });
+
+            // ── Register ───────────────────────────────────────────────────
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name            = document.getElementById('regName').value.trim();
+                const email           = document.getElementById('regEmail').value.trim();
+                const password        = document.getElementById('regPassword').value;
+                const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+                const selectedType    = document.querySelector('input[name="userType"]:checked');
+
+                if (password !== passwordConfirm) {
+                    showNotification('Las contraseñas no coinciden', 'error');
+                    return;
+                }
+                if (!selectedType) {
+                    showNotification('Por favor, selecciona si eres conductor o viajero', 'error');
+                    return;
+                }
+
+                const user = { name, email, type: selectedType.value };
+                localStorage.setItem('uniride_user', JSON.stringify(user));
+                window.location.href = 'index.html';
+            });
+
+            // ── Forgot password ────────────────────────────────────────────
+            document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
+                const email = prompt('Introduce tu email y te enviaremos un enlace de recuperación:');
+                if (email && email.trim()) {
+                    showNotification(`Enlace de recuperación enviado a ${email.trim()}`, 'success');
+                } else if (email !== null) {
+                    showNotification('Por favor, introduce un email válido', 'error');
+                }
+            });
+
+            // ── Terms modal ────────────────────────────────────────────────
+            const termsModal     = document.getElementById('termsModal');
+            const closeTermsModal = document.getElementById('closeTermsModal');
+            const acceptTermsBtn  = document.getElementById('acceptTermsBtn');
+
+            document.getElementById('termsBtn').addEventListener('click', () => {
+                termsModal.classList.remove('hidden');
+            });
+            function hideTerms() { termsModal.classList.add('hidden'); }
+            closeTermsModal.addEventListener('click', hideTerms);
+            acceptTermsBtn.addEventListener('click', hideTerms);
+
+            // ── Prevent # links ────────────────────────────────────────────
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a[href="#"]');
+                if (link) {
+                    e.preventDefault();
+                    showNotification('Enlace en desarrollo', 'info');
+                }
+            });
+        });
+
+        // ── Notifications ──────────────────────────────────────────────────
+        function showNotification(message, type) {
+            const n = document.createElement('div');
+            n.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error'   ? 'bg-red-500 text-white'   :
+                                     'bg-blue-500 text-white'
+            }`;
+            n.innerHTML = `<div class="flex items-center">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-3"></i>
+                <span>${message}</span>
+            </div>`;
+            document.body.appendChild(n);
+            setTimeout(() => { n.style.opacity = '0'; setTimeout(() => n.remove(), 300); }, 3000);
+        }
+    </script>
+</body>
+</html>
