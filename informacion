@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniride - Información de Utilidades</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Añade margen arriba para que el menú superior no tape el título al hacer scroll a un enlace */
+        section {
+            scroll-margin-top: 6rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="flex items-center space-x-2">
+                    <img src="uniride_logo.png" alt="Uniride" class="h-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="hidden items-center space-x-2">
+                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">U</span>
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-800">Uniride</h1>
+                    </div>
+                </a>
+                <div>
+                    <a href="index.html" class="text-primary font-medium hover:underline flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver al Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 max-w-4xl">
+        <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center">Centro de Información</h1>
+        
+        <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 space-y-12">
+            
+            <!-- Para Conductores -->
+            <div>
+                <h2 class="text-2xl font-bold text-primary border-b pb-2 mb-6 flex items-center">
+                    <i class="fas fa-car mr-3"></i>Para Conductores
+                </h2>
+                
+                <section id="publicar" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Cómo publicar un viaje</h3>
+                    <p class="text-gray-600 mb-2">Para publicar un viaje en Uniride debes estar registrado como <strong>Conductor</strong>. Desde tu panel principal, utiliza el formulario "Crear Viaje".</p>
+                    <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
+                        <li>Indica tu origen y destino exactos (ej. Tendillas a Campus de Rabanales).</li>
+                        <li>Establece la fecha y hora de salida.</li>
+                        <li>Indica cuántos asientos tienes disponibles.</li>
+                        <li>Fija un precio justo por persona para compartir gastos.</li>
+                    </ul>
+                </section>
+
+                <section id="tarifas" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Tarifas recomendadas en Córdoba</h3>
+                    <p class="text-gray-600 mb-2">Uniride promueve compartir gastos, no el lucro. Recomendamos tarifas acordes al trayecto:</p>
+                    <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
+                        <li><strong>Trayectos urbanos cortos (Centro - Rabanales):</strong> 1.00€ - 2.50€ por persona.</li>
+                        <li><strong>Trayectos periféricos (Figueroa, Brillante - Rabanales):</strong> 1.50€ - 2.50€ por persona.</li>
+                        <li>Recuerda que estas tarifas cubren la gasolina y el mantenimiento de forma proporcional.</li>
+                    </ul>
+                </section>
+
+                <section id="seguridad-conductores" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Seguridad para conductores</h3>
+                    <p class="text-gray-600 mb-2">Tu seguridad y la de tus pasajeros es nuestra prioridad. Sigue estas recomendaciones básicas:</p>
+                    <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
+                        <li>Mantén tu vehículo en óptimas condiciones (neumáticos, líquidos, frenos).</li>
+                        <li>Asegúrate de tener el carnet de conducir y el seguro obligatorio vigentes.</li>
+                        <li>Respeta siempre las normas de tráfico y los límites de velocidad, en especial cerca de los recintos del campus.</li>
+                    </ul>
+                </section>
+
+                <section id="faq" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Preguntas frecuentes</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <strong class="text-gray-800 block mb-1">¿Qué pasa si un viajero no aparece?</strong>
+                            <p class="text-gray-600">Recomendamos esperar 5-10 minutos de cortesía. Si la persona no aparece, puedes iniciar tu viaje y reportar la ausencia ("No Show") en el sistema.</p>
+                        </div>
+                        <div>
+                            <strong class="text-gray-800 block mb-1">¿Cómo cobro el viaje?</strong>
+                            <p class="text-gray-600">Actualmente, los pagos se realizan directamente entre usuarios en efectivo o por Bizum al iniciar el viaje. Próximamente se integrarán pagos automáticos.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Para Viajeros -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <h2 class="text-2xl font-bold text-accent border-b pb-2 mb-6 flex items-center">
+                    <i class="fas fa-users mr-3"></i>Para Viajeros
+                </h2>
+                
+                <section id="unirse" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Cómo unirte a un viaje</h3>
+                    <p class="text-gray-600 mb-2">Viajar con Uniride es muy fácil. Desde tu panel de usuario:</p>
+                    <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
+                        <li>Usa la barra de búsqueda para filtrar viajes por origen o destino (ej. "Rabanales").</li>
+                        <li>Revisa los detalles del viaje: horario, precio, vehículo y plazas disponibles.</li>
+                        <li>Haz clic en el botón verde "Unirse al Viaje" para reservar tu plaza.</li>
+                        <li>Comunícate con el conductor para acordar el punto de encuentro exacto.</li>
+                    </ul>
+                </section>
+
+                <section id="cancelacion" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Política de cancelación</h3>
+                    <p class="text-gray-600 mb-2">Para mantener una comunidad fiable, pedimos responsabilidad al cancelar:</p>
+                    <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
+                        <li>Si necesitas cancelar tu viaje, avisa con al menos <strong>1 hora de antelación</strong>.</li>
+                        <li>Las cancelaciones de última hora o no presentarse sin avisar pueden afectar negativamente tu valoración.</li>
+                        <li>Si el conductor cancela el viaje, el sistema te notificará de inmediato.</li>
+                    </ul>
+                </section>
+
+                <section id="seguridad-viajeros" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Seguridad para viajeros</h3>
+                    <p class="text-gray-600 mb-2">Viaja con tranquilidad siguiendo estas pautas:</p>
+                    <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
+                        <li>Revisa las valoraciones y comentarios sobre el conductor antes de subir al vehículo.</li>
+                        <li>Confirma siempre que el coche coincide con el modelo y matrícula indicados.</li>
+                        <li>Usa siempre el cinturón de seguridad, es obligatorio para todos los pasajeros.</li>
+                    </ul>
+                </section>
+
+                <section id="valoraciones" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Sistema de valoraciones</h3>
+                    <p class="text-gray-600 mb-2">Al finalizar un trayecto, podrás valorar tu experiencia del 1 al 5 y dejar un breve comentario. Esto sirve para:</p>
+                    <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
+                        <li>Premiar y destacar a los conductores amables y puntuales.</li>
+                        <li>Mantener un alto estándar de calidad en Uniride.</li>
+                        <li>Informar al equipo de soporte sobre posibles irregularidades.</li>
+                    </ul>
+                </section>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="mb-4 md:mb-0 flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                        <span class="text-primary font-bold">U</span>
+                    </div>
+                    <span class="text-lg font-bold">Uniride</span>
+                </div>
+                <div class="text-center text-gray-400 text-sm">
+                    <p>&copy; 2026 Uniride. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
