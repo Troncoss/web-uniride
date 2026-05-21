@@ -48,15 +48,16 @@
                     </div>
                     
                     <!-- Left: User Info -->
-                    <div class="flex items-center space-x-4">
-                        <div class="text-sm text-gray-600">
+                    <div class="flex items-center space-x-6">
+
+                        <div class="text-sm text-gray-600 hidden md:block">
                             <span class="font-medium">Sesión iniciada como:</span>
                             <span id="userName" class="text-primary font-semibold ml-1">Usuario</span>
                             <span id="userTypeBadge" class="ml-2 px-2 py-1 rounded-full text-xs font-medium"></span>
                         </div>
                     </div>
                     
-                    <!-- Right: Social & Logout -->
+                    <!-- Center spacer (logo already absolute positioned) --> Right: Social & Logout -->
                     <div class="flex items-center space-x-4">
                         <div class="hidden md:flex items-center space-x-3 text-gray-600">
                             <span class="text-sm">Contáctanos en:</span>
@@ -69,6 +70,10 @@
                                 </a>
                             </div>
                         </div>
+                        
+                        <button id="settingsBtn" title="Ajustes de cuenta" class="px-3 py-2 text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition duration-200">
+                            <i class="fas fa-cog"></i>
+                        </button>
                         
                         <button id="logoutBtn" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-200">
                             <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
@@ -157,6 +162,14 @@
                         </div>
                         
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo del coche</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-car"></i></span>
+                                <input type="text" id="carModelInput" placeholder="Ej: Renault Clio, Ford Focus..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Descripción (opcional)</label>
                             <textarea rows="3" placeholder="Detalles adicionales sobre el viaje..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
                         </div>
@@ -203,6 +216,69 @@
                 </div>
             </div>
             
+            <!-- Account Settings Modal -->
+            <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                                <i class="fas fa-cog text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Ajustes de Cuenta</h3>
+                        </div>
+                        <button id="closeSettingsModal" class="text-gray-400 hover:text-gray-600 transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Current info -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <p class="text-sm text-gray-500 mb-1">Cuenta actual</p>
+                        <p class="font-semibold text-gray-800" id="settingsCurrentName"></p>
+                        <p class="text-sm text-gray-500" id="settingsCurrentEmail"></p>
+                    </div>
+
+                    <form id="settingsForm" class="space-y-5">
+                        <!-- Name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                            <input type="text" id="settingsName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Tu nombre">
+                        </div>
+
+                        <!-- Account type -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de cuenta</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label id="typeDriverLabel" class="flex items-center p-3 border-2 rounded-xl cursor-pointer transition duration-200 hover:border-blue-400">
+                                    <input type="radio" name="accountType" value="driver" id="typeDriver" class="hidden">
+                                    <i class="fas fa-car text-blue-500 mr-2"></i>
+                                    <span class="font-medium">Conductor</span>
+                                </label>
+                                <label id="typeTravelerLabel" class="flex items-center p-3 border-2 rounded-xl cursor-pointer transition duration-200 hover:border-green-400">
+                                    <input type="radio" name="accountType" value="traveler" id="typeTraveler" class="hidden">
+                                    <i class="fas fa-user text-green-500 mr-2"></i>
+                                    <span class="font-medium">Viajero</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Change password -->
+                        <div class="border-t border-gray-100 pt-5">
+                            <p class="text-sm font-medium text-gray-700 mb-3">Cambiar contraseña <span class="text-gray-400 font-normal">(dejar en blanco para no cambiar)</span></p>
+                            <div class="space-y-3">
+                                <input type="password" id="settingsNewPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nueva contraseña">
+                                <input type="password" id="settingsConfirmPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Confirmar nueva contraseña">
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-3 pt-2">
+                            <button type="button" id="cancelSettings" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition duration-200">Cancelar</button>
+                            <button type="submit" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition duration-200 font-semibold">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Multimedia Section -->
             <div class="max-w-6xl mx-auto mb-16">
                 <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -213,68 +289,19 @@
                             </div>
                             <div>
                                 <h3 class="text-2xl font-bold text-gray-800">Galería de Viajes</h3>
-                                <p class="text-gray-600">Comparte y descubre experiencias de la comunidad</p>
+                                <p class="text-gray-600">Comparte y descubre experiencias</p>
                             </div>
                         </div>
                         <button id="uploadPhotoBtn" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 flex items-center">
                             <i class="fas fa-upload mr-2"></i>Subir Foto
                         </button>
                     </div>
-                    
-                    <!-- Upload Modal -->
-                    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
-                        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-xl font-bold text-gray-800">Subir Foto del Viaje</h3>
-                                <button id="closeUploadModal" class="text-gray-500 hover:text-gray-700">
-                                    <i class="fas fa-times text-xl"></i>
-                                </button>
-                            </div>
-                            
-                            <form id="uploadPhotoForm" class="space-y-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                                    <input type="text" required placeholder="Mi viaje a..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                                    <textarea rows="3" placeholder="Comparte tu experiencia..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"></textarea>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ruta del viaje</label>
-                                    <input type="text" placeholder="Origen - Destino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Subir foto</label>
-                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition duration-200 cursor-pointer" id="dropZone">
-                                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                                        <p class="text-gray-600">Arrastra y suelta tu foto aquí</p>
-                                        <p class="text-gray-500 text-sm mt-2">o haz clic para seleccionar</p>
-                                        <input type="file" id="photoInput" accept="image/*" class="hidden">
-                                    </div>
-                                    <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
-                                </div>
-                                
-                                <div class="flex space-x-4">
-                                    <button type="button" id="cancelUpload" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200">
-                                        Cancelar
-                                    </button>
-                                    <button type="submit" class="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
-                                        Publicar
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    
+
                     <!-- Photo Grid -->
-                    <div id="photoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div id="photoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Photos will be rendered here -->
                     </div>
-                    
+
                     <div class="text-center mt-8">
                         <button id="loadMorePhotos" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200">
                             <i class="fas fa-sync-alt mr-2"></i>Cargar más fotos
@@ -282,33 +309,73 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- My Trips Section -->
-            <div class="max-w-6xl mx-auto mb-16" id="myTripsSectionContainer" style="display: none;">
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
-                            <i class="fas fa-suitcase-rolling text-green-600 text-2xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-gray-800">Mis Viajes Apuntados</h3>
-                            <p class="text-gray-600">Viajes a los que vas a asistir</p>
-                        </div>
+
+            <!-- Upload Modal -->
+            <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+                <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">Subir Foto del Viaje</h3>
+                        <button id="closeUploadModal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
                     </div>
+                    
+                    <form id="uploadPhotoForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                            <input type="text" required placeholder="Mi viaje a..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                            <textarea rows="3" placeholder="Comparte tu experiencia..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ruta del viaje</label>
+                            <input type="text" placeholder="Origen - Destino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Subir foto</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition duration-200 cursor-pointer" id="dropZone">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-600">Arrastra y suelta tu foto aquí</p>
+                                <p class="text-gray-500 text-sm mt-2">o haz clic para seleccionar</p>
+                                <input type="file" id="photoInput" accept="image/*" class="hidden">
+                            </div>
+                            <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button type="button" id="cancelUpload" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
+                                Publicar
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div id="myTripsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- My trips will be rendered here -->
+            </div>
+            
+            <!-- Pending Trips Section -->
+            <div class="max-w-6xl mx-auto mb-16">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800">Tus Viajes Pendientes</h3>
+                </div>
+                <div id="pendingTrips" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Pending trips will be rendered here -->
                 </div>
             </div>
 
-            <!-- Recent Trips Section -->
-            <div class="max-w-6xl mx-auto mb-16">
+            <!-- Past Trips Section -->
+            <div class="max-w-6xl mx-auto">
                 <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-2xl font-bold text-gray-800">Próximos Viajes Añadidos</h3>
+                    <h3 class="text-2xl font-bold text-gray-800">Tus Viajes Pasados</h3>
                 </div>
-                
-                <div id="recentTrips" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Recent trips will be rendered here -->
+                <div id="pastTrips" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Past trips will be rendered here -->
                 </div>
             </div>
         </main>
@@ -463,7 +530,7 @@
             ).join("");
         }
 
-        function renderTripCards(items, hideJoinBtn = false) {
+        function renderTripCards(items) {
             if (items.length === 0) {
                 return `<div class="text-center py-8 text-gray-500">
                     <i class="fas fa-search text-4xl mb-4"></i>
@@ -471,7 +538,17 @@
                 </div>`;
             }
             
-            return items.map(trip => `
+            return items.map(trip => {
+                const isOwner = trip.driver_id == currentUser.id;
+                const actionBtn = isOwner
+                    ? `<button class="w-full bg-red-100 text-red-600 py-3 rounded-lg font-medium hover:bg-red-200 transition duration-200 flex items-center justify-center cancel-trip-btn" data-trip-id="${trip.id}" data-role="driver">
+                        <i class="fas fa-times-circle mr-2"></i>Cancelar mi viaje
+                       </button>`
+                    : `<button class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 flex items-center justify-center join-trip-btn" data-trip-id="${trip.id}">
+                        <i class="fas fa-check-circle mr-2"></i>Unirse al Viaje
+                       </button>`;
+
+                return `
                 <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-primary transition duration-200">
                     <div class="flex justify-between items-start mb-4">
                         <div>
@@ -496,47 +573,39 @@
                         </div>
                     </div>
                     
-                    ${hideJoinBtn ? '' : `<button class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 flex items-center justify-center join-trip-btn" data-trip-id="${trip.id}">
-                        <i class="fas fa-check-circle mr-2"></i>Unirse al Viaje
-                    </button>`}
+                    ${actionBtn}
                 </div>
-            `).join("");
+            `}).join("");
         }
 
-        function renderRecentTrips(items) {
+        function renderUserTrips(items, isPending) {
             return items.map(trip => `
-                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm relative">
                     <div class="flex items-center justify-between mb-4">
-                        <span class="px-3 py-1 rounded-full text-sm font-medium ${trip.type === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
-                            ${trip.type === 'driver' ? 'Conductor' : 'Viajero'}
+                        <span class="px-3 py-1 rounded-full text-sm font-medium ${trip.role === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                            ${trip.role === 'driver' ? 'Conductor' : 'Viajero'}
                         </span>
-                        <span class="text-gray-500 text-sm">${trip.date}</span>
+                        <span class="text-gray-500 text-sm">${trip.date} - ${trip.time}</span>
                     </div>
                     
                     <h4 class="font-bold text-lg text-gray-800 mb-2">${trip.origin} → ${trip.destination}</h4>
                     
-                    ${trip.type === 'driver' ? 
-                        `<div class="space-y-2">
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-users text-gray-400 mr-3"></i>
-                                <span>${trip.passengers} pasajero${trip.passengers !== 1 ? 's' : ''}</span>
-                            </div>
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-money-bill-wave text-gray-400 mr-3"></i>
-                                <span>Ganancia: $${trip.earnings.toFixed(2)}</span>
-                            </div>
-                        </div>` :
-                        `<div class="space-y-2">
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-user text-gray-400 mr-3"></i>
-                                <span>Conductor: ${trip.driver}</span>
-                            </div>
-                            <div class="flex items-center text-gray-700">
-                                <i class="fas fa-money-bill-wave text-gray-400 mr-3"></i>
-                                <span>Costo: $${trip.cost.toFixed(2)}</span>
-                            </div>
-                        </div>`
-                    }
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-users text-gray-400 mr-3"></i>
+                            <span>${trip.seats} asientos disponibles</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-car text-gray-400 mr-3"></i>
+                            <span>${trip.car || 'Vehículo estándar'}</span>
+                        </div>
+                    </div>
+                    
+                    ${isPending && trip.driver_id == currentUser.id ? `
+                        <button class="w-full mt-2 bg-red-100 text-red-600 py-2 rounded-lg font-medium hover:bg-red-200 transition duration-200 cancel-trip-btn" data-trip-id="${trip.id}" data-role="${trip.role}">
+                            <i class="fas fa-times-circle mr-2"></i>Cancelar Viaje
+                        </button>
+                    ` : ''}
                 </div>
             `).join("");
         }
@@ -573,12 +642,12 @@
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-heart text-red-400 mr-1"></i>
-                                    <span>${photo.likes || 0}</span>
+                                    <span id="likes-count-${photo.id}">${photo.likes || 0}</span>
                                 </div>
-                                <div class="flex items-center">
+                                <button class="flex items-center hover:text-purple-600 transition comment-photo-btn" data-photo-id="${photo.id}">
                                     <i class="fas fa-comment text-gray-400 mr-1"></i>
-                                    <span>${photo.comments || 0}</span>
-                                </div>
+                                    <span id="comments-count-${photo.id}">${photo.comments || 0}</span>
+                                </button>
                             </div>
                             <button class="like-photo-btn text-gray-400 hover:text-red-400 transition duration-200" data-photo-id="${photo.id}">
                                 <i class="far fa-heart"></i>
@@ -641,7 +710,7 @@
                     if (mainPanelsGrid) mainPanelsGrid.className = 'grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16';
                 } else {
                     createTripPanel.classList.add('hidden');
-                    if (mainPanelsGrid) mainPanelsGrid.className = 'grid grid-cols-1 gap-8 max-w-3xl mx-auto mb-16';
+                    if (mainPanelsGrid) mainPanelsGrid.className = 'grid grid-cols-1 gap-8 max-w-6xl mx-auto mb-16';
                 }
             }
 
@@ -649,11 +718,11 @@
             const roleBanner = document.getElementById('roleBanner');
             if (roleBanner) {
                 if (userType === 'driver') {
-                    roleBanner.className = 'max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 bg-blue-50 text-blue-800 border border-blue-200';
-                    roleBanner.innerHTML = '<i class="fas fa-car"></i> <span>Estás usando Uniride como <strong>Conductor</strong>. Puedes publicar viajes y también unirte a viajes de otros conductores.</span>';
+                    roleBanner.className = 'max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-between bg-blue-50 text-blue-800 border border-blue-200';
+                    roleBanner.innerHTML = '<div class="flex items-center gap-3"><i class="fas fa-car"></i> <span>Estás usando Uniride como <strong>Conductor</strong>. Puedes publicar viajes y también unirte a viajes de otros conductores.</span></div> <button onclick="this.parentElement.style.display=\'none\'" class="text-blue-500 hover:text-blue-700 ml-4 p-1 rounded hover:bg-blue-100 transition"><i class="fas fa-times"></i></button>';
                 } else {
-                    roleBanner.className = 'max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 bg-green-50 text-green-800 border border-green-200';
-                    roleBanner.innerHTML = '<i class="fas fa-users"></i> <span>Estás usando Uniride como <strong>Viajero</strong>. Busca y únete a viajes disponibles. Si quieres crear viajes, regístrate como conductor.</span>';
+                    roleBanner.className = 'max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-between bg-green-50 text-green-800 border border-green-200';
+                    roleBanner.innerHTML = '<div class="flex items-center gap-3"><i class="fas fa-users"></i> <span>Estás usando Uniride como <strong>Viajero</strong>. Busca y únete a viajes disponibles. Si quieres crear viajes, regístrate como conductor.</span></div> <button onclick="this.parentElement.style.display=\'none\'" class="text-green-500 hover:text-green-700 ml-4 p-1 rounded hover:bg-green-100 transition"><i class="fas fa-times"></i></button>';
                 }
             }
 
@@ -662,6 +731,116 @@
                 logoutBtn.addEventListener('click', () => {
                     localStorage.removeItem('uniride_user');
                     window.location.href = 'login.html';
+                });
+            }
+
+            // ── Account Settings Modal ─────────────────────────────────────────
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsModal = document.getElementById('settingsModal');
+            const closeSettingsModal = document.getElementById('closeSettingsModal');
+            const cancelSettings = document.getElementById('cancelSettings');
+            const settingsForm = document.getElementById('settingsForm');
+            const typeDriverLabel = document.getElementById('typeDriverLabel');
+            const typeTravelerLabel = document.getElementById('typeTravelerLabel');
+
+            function openSettingsModal() {
+                // Populate current info
+                document.getElementById('settingsCurrentName').textContent = currentUser.name;
+                document.getElementById('settingsCurrentEmail').textContent = currentUser.email;
+                document.getElementById('settingsName').value = currentUser.name;
+
+                // Set selected account type
+                const driverRadio = document.getElementById('typeDriver');
+                const travelerRadio = document.getElementById('typeTraveler');
+                if (currentUser.type === 'driver') {
+                    driverRadio.checked = true;
+                    typeDriverLabel.className = typeDriverLabel.className.replace('border-gray-200', 'border-blue-500 bg-blue-50');
+                    typeDriverLabel.classList.add('border-blue-500', 'bg-blue-50');
+                } else {
+                    travelerRadio.checked = true;
+                    typeTravelerLabel.classList.add('border-green-500', 'bg-green-50');
+                }
+
+                // Clear password fields
+                document.getElementById('settingsNewPassword').value = '';
+                document.getElementById('settingsConfirmPassword').value = '';
+
+                settingsModal.classList.remove('hidden');
+            }
+
+            function closeSettings() {
+                settingsModal.classList.add('hidden');
+                // Reset radio styles
+                typeDriverLabel.className = 'flex items-center p-3 border-2 rounded-xl cursor-pointer transition duration-200 hover:border-blue-400';
+                typeTravelerLabel.className = 'flex items-center p-3 border-2 rounded-xl cursor-pointer transition duration-200 hover:border-green-400';
+            }
+
+            // Radio button visual feedback
+            document.querySelectorAll('input[name="accountType"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    typeDriverLabel.className = 'flex items-center p-3 border-2 rounded-xl cursor-pointer transition duration-200 hover:border-blue-400';
+                    typeTravelerLabel.className = 'flex items-center p-3 border-2 rounded-xl cursor-pointer transition duration-200 hover:border-green-400';
+                    if (radio.value === 'driver') {
+                        typeDriverLabel.classList.add('border-blue-500', 'bg-blue-50');
+                    } else {
+                        typeTravelerLabel.classList.add('border-green-500', 'bg-green-50');
+                    }
+                });
+            });
+
+            if (settingsBtn) settingsBtn.addEventListener('click', openSettingsModal);
+            if (closeSettingsModal) closeSettingsModal.addEventListener('click', closeSettings);
+            if (cancelSettings) cancelSettings.addEventListener('click', closeSettings);
+            settingsModal?.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettings(); });
+
+            if (settingsForm) {
+                settingsForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const newName = document.getElementById('settingsName').value.trim();
+                    const newType = document.querySelector('input[name="accountType"]:checked')?.value || currentUser.type;
+                    const newPassword = document.getElementById('settingsNewPassword').value;
+                    const confirmPassword = document.getElementById('settingsConfirmPassword').value;
+
+                    if (!newName) { showNotification('El nombre no puede estar vacío', 'error'); return; }
+
+                    if (newPassword && newPassword !== confirmPassword) {
+                        showNotification('Las contraseñas no coinciden', 'error');
+                        return;
+                    }
+
+                    const payload = { name: newName, type: newType };
+                    if (newPassword) payload.password = newPassword;
+
+                    try {
+                        const response = await fetch(`/api/users/${currentUser.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            // Update local session
+                            currentUser.name = newName;
+                            currentUser.type = newType;
+                            localStorage.setItem('uniride_user', JSON.stringify(currentUser));
+
+                            showNotification('¡Ajustes guardados correctamente!', 'success');
+                            closeSettings();
+
+                            // Reload page to reflect type change
+                            if (newType !== userType) {
+                                setTimeout(() => window.location.reload(), 1000);
+                            } else {
+                                if (userName) userName.textContent = newName;
+                            }
+                        } else {
+                            showNotification(data.error || 'Error al guardar ajustes', 'error');
+                        }
+                    } catch (err) {
+                        showNotification('Error de conexión con el servidor', 'error');
+                    }
                 });
             }
 
@@ -680,25 +859,46 @@
                         if (tripsList) {
                             tripsList.innerHTML = renderTripCards(availableTrips);
                         }
-                        // Load "Mis Viajes"
-                        fetch('/api/trips/joined/' + currentUser.id)
+                        
+                        // Fetch user specific trips (pending and past)
+                        fetch(`/api/users/${currentUser.id}/trips`)
                             .then(res => res.json())
-                            .then(joined => {
-                                if (joined.length > 0) {
-                                    document.getElementById('myTripsSectionContainer').style.display = 'block';
-                                    const myTripsList = document.getElementById('myTripsList');
-                                    if (myTripsList) {
-                                        myTripsList.innerHTML = renderTripCards(joined, true); // true = hide join button
+                            .then(userTrips => {
+                                // Filter by user type: driver only sees their created trips, traveler only sees their reservations
+                                const roleTrips = userTrips.filter(t => {
+                                    if (currentUser.type === 'driver') return t.role === 'driver';
+                                    return t.role === 'traveler';
+                                });
+
+                                const pendingTripsContainer = document.getElementById('pendingTrips');
+                                const pastTripsContainer = document.getElementById('pastTrips');
+                                
+                                const today = new Date().toISOString().split('T')[0];
+                                
+                                const pendingTrips = roleTrips.filter(t => t.date >= today);
+                                const pastTrips = roleTrips.filter(t => t.date < today);
+                                
+                                if (pendingTripsContainer) {
+                                    if (pendingTrips.length === 0) {
+                                        pendingTripsContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-4">No tienes viajes pendientes.</div>';
+                                    } else {
+                                        pendingTripsContainer.innerHTML = renderUserTrips(pendingTrips, true);
                                     }
                                 }
-                            });
-
-                        // Set minimum date for trip creation to today
-                        const dateInput = document.querySelector('input[type="date"]');
-                        if (dateInput) {
-                            const today = new Date().toISOString().split('T')[0];
-                            dateInput.setAttribute('min', today);
-                        }
+                                
+                                if (pastTripsContainer) {
+                                    if (pastTrips.length === 0) {
+                                        pastTripsContainer.innerHTML = '<div class="col-span-3 text-center text-gray-500 py-4">No tienes viajes pasados.</div>';
+                                    } else {
+                                        pastTripsContainer.innerHTML = renderUserTrips(pastTrips, false);
+                                    }
+                                }
+                                
+                                bindCancelTripEvents();
+                            })
+                            .catch(err => console.error('Error fetching user trips', err));
+                        
+                        bindJoinTripEvents();
                     })
                     .catch(() => {
                         // If API fails, show empty state
@@ -707,16 +907,6 @@
                             tripsList.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-database text-4xl mb-4"></i><p>No se pudieron cargar los viajes del servidor.</p></div>';
                         }
                     });
-                
-                // Render recent trips
-                const recentTripsContainer = document.getElementById('recentTrips');
-                if (recentTripsContainer) {
-                    // Show 3 first upcoming trips
-                    setTimeout(() => {
-                        recentTripsContainer.innerHTML = renderTripCards(availableTrips.slice(0, 3));
-                        bindJoinTripEvents();
-                    }, 500); // Give it time to load availableTrips
-                }
                 
                 // Fetch photos from database
                 fetch('/api/photos')
@@ -766,13 +956,14 @@
                 if (createTripForm) {
                     createTripForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        const inputs = createTripForm.querySelectorAll('input, textarea');
+                        const inputs = createTripForm.querySelectorAll('input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea');
                         const origin = inputs[0].value;
                         const destination = inputs[1].value;
                         const date = inputs[2].value;
                         const time = inputs[3].value;
                         const price = inputs[4].value;
-                        const description = inputs[5] ? inputs[5].value : '';
+                        const carModel = document.getElementById('carModelInput').value;
+                        const description = createTripForm.querySelector('textarea') ? createTripForm.querySelector('textarea').value : '';
 
                         try {
                             const response = await fetch('/api/trips', {
@@ -782,7 +973,7 @@
                                     origin, destination, date, time,
                                     seats: seatCount,
                                     price: parseFloat(price),
-                                    car: '',
+                                    car: carModel,
                                     description,
                                     driver_id: currentUser.id,
                                     driver_name: currentUser.name
@@ -935,19 +1126,87 @@
                     });
                 }
                 
+                // Like & Comment photo functionality via event delegation
+                const photoGridElement = document.getElementById('photoGrid');
+                if (photoGridElement) {
+                    photoGridElement.addEventListener('click', async (e) => {
+                        const likeBtn = e.target.closest('.like-photo-btn');
+                        const commentBtn = e.target.closest('.comment-photo-btn');
+                        
+                        if (likeBtn) {
+                            const photoId = likeBtn.dataset.photoId;
+                            const icon = likeBtn.querySelector('i');
+                            const action = icon.classList.contains('far') ? 'like' : 'unlike';
+                            
+                            try {
+                                const response = await fetch(`/api/photos/${photoId}/like`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action })
+                                });
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    document.getElementById(`likes-count-${photoId}`).textContent = data.likes;
+                                    if (action === 'like') {
+                                        icon.classList.remove('far');
+                                        icon.classList.add('fas', 'text-red-400');
+                                        showNotification('¡Foto añadida a favoritos!', 'success');
+                                    } else {
+                                        icon.classList.remove('fas', 'text-red-400');
+                                        icon.classList.add('far');
+                                        showNotification('Foto removida de favoritos', 'info');
+                                    }
+                                }
+                            } catch (err) {
+                                showNotification('Error al dar like', 'error');
+                            }
+                        }
+                        
+                        if (commentBtn) {
+                            const photoId = commentBtn.dataset.photoId;
+                            const comment = prompt('Escribe tu comentario:');
+                            if (comment && comment.trim() !== '') {
+                                try {
+                                    const response = await fetch(`/api/photos/${photoId}/comment`, {
+                                        method: 'POST'
+                                    });
+                                    if (response.ok) {
+                                        const data = await response.json();
+                                        document.getElementById(`comments-count-${photoId}`).textContent = data.comments;
+                                        showNotification('¡Comentario publicado!', 'success');
+                                    }
+                                } catch (err) {
+                                    showNotification('Error al publicar comentario', 'error');
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Load more photos
+                const loadMorePhotos = document.getElementById('loadMorePhotos');
+                if (loadMorePhotos) {
+                    loadMorePhotos.addEventListener('click', async () => {
+                        try {
+                            const res = await fetch('/api/photos');
+                            travelPhotos = await res.json();
+                            const photoGrid = document.getElementById('photoGrid');
+                            if (photoGrid) photoGrid.innerHTML = renderTravelPhotos(travelPhotos);
+                            showNotification('Fotos actualizadas', 'success');
+                        } catch (err) {
+                            showNotification('Error al cargar fotos', 'error');
+                        }
+                    });
+                }
+            }
+            
             function bindJoinTripEvents() {
                 document.querySelectorAll('.join-trip-btn').forEach(btn => {
                     btn.addEventListener('click', async function() {
                         const tripId = this.dataset.tripId;
                         
-                        // Prevent joining the same trip twice visually
-                        if (joinedTrips.has(tripId)) {
-                            showNotification('Ya te has unido a este viaje anteriormente', 'error');
-                            return;
-                        }
-
                         try {
-                            const response = await fetch('/api/trips/' + tripId + '/join', {
+                            const response = await fetch(`/api/trips/${tripId}/join`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ user_id: currentUser.id })
@@ -956,94 +1215,72 @@
                             const data = await response.json();
                             
                             if (response.ok) {
-                                joinedTrips.add(tripId);
                                 showNotification(data.message, 'success');
-                                
-                                // Refresh everything
-                                fetch('/api/trips').then(res => res.json()).then(trips => {
-                                    availableTrips = trips;
-                                    const tripsList = document.getElementById('tripsList');
-                                    if (tripsList) {
-                                        const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
-                                        const searchTerm = document.getElementById('searchTrips')?.value.toLowerCase() || '';
-                                        const filtered = availableTrips.filter(t => {
-                                            const matchesSearch = t.origin.toLowerCase().includes(searchTerm) || 
-                                                                 t.destination.toLowerCase().includes(searchTerm);
-                                            const matchesFilter = activeFilter === 'all' || t.filter === activeFilter;
-                                            return matchesSearch && matchesFilter;
-                                        });
-                                        tripsList.innerHTML = renderTripCards(filtered);
-                                        bindJoinTripEvents();
-                                    }
-                                });
-
-                                fetch('/api/trips/joined/' + currentUser.id).then(res => res.json()).then(joined => {
-                                    if (joined.length > 0) {
-                                        document.getElementById('myTripsSectionContainer').style.display = 'block';
-                                        const myTripsList = document.getElementById('myTripsList');
-                                        if (myTripsList) myTripsList.innerHTML = renderTripCards(joined, true);
-                                    }
-                                });
-
+                                initializeDashboardContent(); // Reload everything to update seats and lists
                             } else {
-                                showNotification(data.error || 'Error al unirse', 'error');
+                                showNotification(data.error, 'error');
                             }
                         } catch (err) {
-                            showNotification('Error de red al intentar unirse', 'error');
+                            showNotification('Error al intentar unirse al viaje', 'error');
                         }
                     });
                 });
-                markJoinedButtons();
             }
-
-            function markJoinedButtons() {
-                document.querySelectorAll('.join-trip-btn').forEach(btn => {
-                    if (joinedTrips.has(btn.dataset.tripId)) {
-                        btn.disabled = true;
-                        btn.classList.remove('bg-accent', 'hover:bg-green-600');
-                        btn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                        btn.innerHTML = '<i class="fas fa-check mr-2"></i>Ya estás apuntado';
-                    }
-                });
-            }
-
-            // Like photo functionality via API
-            document.querySelectorAll('.like-photo-btn').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const icon = this.querySelector('i');
-                    const photoId = this.dataset.photoId;
-                    
-                    if (icon.classList.contains('far')) {
-                        // Optimistic UI update
-                        icon.classList.remove('far');
-                        icon.classList.add('fas', 'text-red-400');
-                        const countSpan = this.parentElement.querySelector('.fa-heart.text-red-400').nextElementSibling;
-                        if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) + 1;
+            
+            function bindCancelTripEvents() {
+                document.querySelectorAll('.cancel-trip-btn').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        if (!confirm('¿Estás seguro de que quieres cancelar?')) return;
+                        
+                        const tripId = this.dataset.tripId;
+                        const role = this.dataset.role;
                         
                         try {
-                            const response = await fetch('/api/photos/' + photoId + '/like', { method: 'POST' });
-                            if (response.ok) {
-                                showNotification('¡Foto añadida a favoritos!', 'success');
-                                const data = await response.json();
-                                if (countSpan) countSpan.textContent = data.likes;
+                            let response;
+                            if (role === 'driver') {
+                                // Driver deletes the whole trip
+                                response = await fetch(`/api/trips/${tripId}`, {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ user_id: currentUser.id })
+                                });
                             } else {
-                                // Revert
-                                icon.classList.remove('fas', 'text-red-400');
-                                icon.classList.add('far');
-                                if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                                // Traveler cancels their reservation
+                                response = await fetch(`/api/trips/${tripId}/cancel`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ user_id: currentUser.id })
+                                });
                             }
-                        } catch(err) {
-                            // Revert
-                            icon.classList.remove('fas', 'text-red-400');
-                            icon.classList.add('far');
-                            if (countSpan) countSpan.textContent = parseInt(countSpan.textContent) - 1;
+                            
+                            const data = await response.json();
+                            
+                            if (response.ok) {
+                                showNotification(data.message, 'success');
+                                initializeDashboardContent(); // Reload everything
+                            } else {
+                                showNotification(data.error, 'error');
+                            }
+                        } catch (err) {
+                            showNotification('Error al cancelar', 'error');
                         }
-                    }
+                    });
                 });
-            });
+            }
+
+            // Removed markJoinedButtons as backend handles uniquely tracking reservations.
 
             function likeBtnHandler() {
-                // Not used anymore as it's handled above
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas', 'text-red-400');
+                    showNotification('¡Foto añadida a favoritos!', 'success');
+                } else {
+                    icon.classList.remove('fas', 'text-red-400');
+                    icon.classList.add('far');
+                    showNotification('Foto removida de favoritos', 'info');
+                }
             }
             
             // Notification function
