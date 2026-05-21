@@ -69,15 +69,15 @@ const db = new sqlite3.Database('./uniride.sqlite', (err) => {
             comments INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
-        // Create joined_trips table
-        db.run(`CREATE TABLE IF NOT EXISTS joined_trips (
+        // Create reservations table if it doesn't exist
+        db.run(`CREATE TABLE IF NOT EXISTS reservations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             trip_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
-            joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(trip_id, user_id),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (trip_id) REFERENCES trips(id),
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(trip_id, user_id)
         )`);
     }
 });
@@ -94,10 +94,11 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // ATENCIÓN: Guardando contraseña en texto plano (SOLO PARA FASE DE PRUEBAS)
+        // En producción DEBES usar: const hashedPassword = await bcrypt.hash(password, 10);
         
         const sql = `INSERT INTO users (name, email, password, type) VALUES (?, ?, ?, ?)`;
-        db.run(sql, [name, email, hashedPassword, type], function(err) {
+        db.run(sql, [name, email, password, type], function(err) {
             if (err) {
                 if (err.message.includes('UNIQUE constraint failed')) {
                     return res.status(400).json({ error: 'El email ya está registrado' });
@@ -134,8 +135,9 @@ app.post('/api/login', (req, res) => {
             return res.status(401).json({ error: 'Email o contraseña incorrectos' });
         }
 
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
+        // ATENCIÓN: Comparando contraseñas en texto plano (SOLO PARA FASE DE PRUEBAS)
+        // En producción DEBES usar: const validPassword = await bcrypt.compare(password, user.password);
+        if (password !== user.password) {
             return res.status(401).json({ error: 'Email o contraseña incorrectos' });
         }
 
@@ -168,12 +170,6 @@ app.post('/api/trips', (req, res) => {
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    // Validar que la fecha no sea en el pasado
-    const today = new Date().toISOString().split('T')[0];
-    if (date < today) {
-        return res.status(400).json({ error: 'No puedes programar un viaje en el pasado' });
-    }
-
     const sql = `INSERT INTO trips (origin, destination, date, time, seats, price, car, description, driver_id, driver_name)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     db.run(sql, [origin, destination, date, time, seats, price, car || '', description || '', driver_id, driver_name], function(err) {
@@ -187,55 +183,99 @@ app.post('/api/trips', (req, res) => {
     });
 });
 
-// Delete a trip
+// Delete a trip (driver cancels trip)
 app.delete('/api/trips/:id', (req, res) => {
-    db.run(`DELETE FROM trips WHERE id = ?`, [req.params.id], function(err) {
-        if (err) return res.status(500).json({ error: 'Error al eliminar el viaje' });
-        res.json({ message: 'Viaje eliminado' });
-    });
-});
-
-// Join a trip
-app.post('/api/trips/:id/join', (req, res) => {
     const tripId = req.params.id;
-    const { user_id } = req.body;
+    const userId = req.body.user_id;
 
-    if (!user_id) return res.status(400).json({ error: 'Falta el id de usuario' });
+    if (!userId) return res.status(400).json({ error: 'user_id es requerido' });
 
-    // Check if seats available
-    db.get(`SELECT seats FROM trips WHERE id = ?`, [tripId], (err, trip) => {
-        if (err || !trip) return res.status(404).json({ error: 'Viaje no encontrado' });
-        if (trip.seats <= 0) return res.status(400).json({ error: 'No quedan plazas en este viaje' });
+    // Verify ownership
+    db.get(`SELECT driver_id FROM trips WHERE id = ?`, [tripId], (err, trip) => {
+        if (err) return res.status(500).json({ error: 'Error al buscar el viaje' });
+        if (!trip) return res.status(404).json({ error: 'Viaje no encontrado' });
+        if (trip.driver_id != userId) return res.status(403).json({ error: 'No tienes permiso para cancelar este viaje' });
 
-        // Insert into joined_trips
-        db.run(`INSERT INTO joined_trips (trip_id, user_id) VALUES (?, ?)`, [tripId, user_id], function(err) {
-            if (err) {
-                if (err.message.includes('UNIQUE constraint failed')) {
-                    return res.status(400).json({ error: 'Ya estás apuntado a este viaje' });
-                }
-                return res.status(500).json({ error: 'Error al unirse al viaje' });
-            }
+        // Delete reservations first
+        db.run(`DELETE FROM reservations WHERE trip_id = ?`, [tripId], function(err) {
+            if (err) return res.status(500).json({ error: 'Error al cancelar reservas' });
             
-            // Decrease seats
-            db.run(`UPDATE trips SET seats = seats - 1 WHERE id = ?`, [tripId], (err) => {
-                if (err) return res.status(500).json({ error: 'Error al actualizar las plazas' });
-                res.json({ message: 'Te has unido al viaje correctamente' });
+            // Delete trip
+            db.run(`DELETE FROM trips WHERE id = ?`, [tripId], function(err) {
+                if (err) return res.status(500).json({ error: 'Error al eliminar el viaje' });
+                res.json({ message: 'Viaje eliminado' });
             });
         });
     });
 });
 
-// Get trips joined by a user
-app.get('/api/trips/joined/:userId', (req, res) => {
+// Join a trip (traveler joins)
+app.post('/api/trips/:id/join', (req, res) => {
+    const tripId = req.params.id;
+    const userId = req.body.user_id;
+
+    if (!userId) return res.status(400).json({ error: 'user_id es requerido' });
+
+    // Check if trip exists and has seats
+    db.get(`SELECT seats FROM trips WHERE id = ?`, [tripId], (err, trip) => {
+        if (err) return res.status(500).json({ error: 'Error al buscar el viaje' });
+        if (!trip) return res.status(404).json({ error: 'Viaje no encontrado' });
+        if (trip.seats <= 0) return res.status(400).json({ error: 'No quedan asientos disponibles' });
+
+        // Create reservation
+        db.run(`INSERT INTO reservations (trip_id, user_id) VALUES (?, ?)`, [tripId, userId], function(err) {
+            if (err) {
+                if (err.message.includes('UNIQUE constraint failed')) {
+                    return res.status(400).json({ error: 'Ya estás unido a este viaje' });
+                }
+                return res.status(500).json({ error: 'Error al unirse al viaje' });
+            }
+
+            // Decrement seats
+            db.run(`UPDATE trips SET seats = seats - 1 WHERE id = ?`, [tripId], function(err) {
+                if (err) return res.status(500).json({ error: 'Error al actualizar asientos' });
+                res.json({ message: 'Te has unido al viaje exitosamente' });
+            });
+        });
+    });
+});
+
+// Cancel reservation (traveler cancels)
+app.post('/api/trips/:id/cancel', (req, res) => {
+    const tripId = req.params.id;
+    const userId = req.body.user_id;
+
+    if (!userId) return res.status(400).json({ error: 'user_id es requerido' });
+
+    db.run(`DELETE FROM reservations WHERE trip_id = ? AND user_id = ?`, [tripId, userId], function(err) {
+        if (err) return res.status(500).json({ error: 'Error al cancelar la reserva' });
+        if (this.changes === 0) return res.status(404).json({ error: 'Reserva no encontrada' });
+
+        // Increment seats
+        db.run(`UPDATE trips SET seats = seats + 1 WHERE id = ?`, [tripId], function(err) {
+            if (err) return res.status(500).json({ error: 'Error al actualizar asientos' });
+            res.json({ message: 'Reserva cancelada exitosamente' });
+        });
+    });
+});
+
+// Get user trips (created & joined)
+app.get('/api/users/:id/trips', (req, res) => {
+    const userId = req.params.id;
+
+    // Get trips where user is driver OR user has a reservation
     const sql = `
-        SELECT t.* 
+        SELECT t.*, 
+               CASE WHEN t.driver_id = ? THEN 'driver' ELSE 'traveler' END as role
         FROM trips t
-        JOIN joined_trips jt ON t.id = jt.trip_id
-        WHERE jt.user_id = ?
+        LEFT JOIN reservations r ON t.id = r.trip_id
+        WHERE t.driver_id = ? OR r.user_id = ?
+        GROUP BY t.id
         ORDER BY t.date ASC, t.time ASC
     `;
-    db.all(sql, [req.params.userId], (err, rows) => {
-        if (err) return res.status(500).json({ error: 'Error al obtener tus viajes' });
+
+    db.all(sql, [userId, userId, userId], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error al obtener los viajes del usuario' });
         res.json(rows);
     });
 });
@@ -273,13 +313,55 @@ app.post('/api/photos', upload.single('photo'), (req, res) => {
 
 // Like a photo
 app.post('/api/photos/:id/like', (req, res) => {
-    db.run(`UPDATE photos SET likes = likes + 1 WHERE id = ?`, [req.params.id], function(err) {
-        if (err) return res.status(500).json({ error: 'Error al dar like' });
-        
-        db.get(`SELECT likes FROM photos WHERE id = ?`, [req.params.id], (err, row) => {
-            if (err) return res.status(500).json({ error: 'Error al obtener likes' });
-            res.json({ message: 'Like añadido', likes: row.likes });
+    const photoId = req.params.id;
+    const action = req.body.action || 'like';
+    const increment = action === 'like' ? 1 : -1;
+    
+    db.run(`UPDATE photos SET likes = MAX(0, likes + ?) WHERE id = ?`, [increment, photoId], function(err) {
+        if (err) return res.status(500).json({ error: 'Error al actualizar likes' });
+        db.get(`SELECT likes FROM photos WHERE id = ?`, [photoId], (err, row) => {
+            if (err || !row) return res.status(500).json({ error: 'Error' });
+            res.json({ likes: row.likes });
         });
+    });
+});
+
+// Comment a photo
+app.post('/api/photos/:id/comment', (req, res) => {
+    const photoId = req.params.id;
+    db.run(`UPDATE photos SET comments = comments + 1 WHERE id = ?`, [photoId], function(err) {
+        if (err) return res.status(500).json({ error: 'Error al añadir comentario' });
+        db.get(`SELECT comments FROM photos WHERE id = ?`, [photoId], (err, row) => {
+            if (err || !row) return res.status(500).json({ error: 'Error' });
+            res.json({ comments: row.comments });
+        });
+    });
+});
+
+// Update user account settings
+app.put('/api/users/:id', (req, res) => {
+    const userId = req.params.id;
+    const { name, type, password } = req.body;
+
+    if (!name || !type) {
+        return res.status(400).json({ error: 'Nombre y tipo son obligatorios' });
+    }
+
+    let sql, params;
+    if (password) {
+        // Update name, type and password
+        sql = `UPDATE users SET name = ?, type = ?, password = ? WHERE id = ?`;
+        params = [name, type, password, userId];
+    } else {
+        // Only update name and type
+        sql = `UPDATE users SET name = ?, type = ? WHERE id = ?`;
+        params = [name, type, userId];
+    }
+
+    db.run(sql, params, function(err) {
+        if (err) return res.status(500).json({ error: 'Error al actualizar los datos' });
+        if (this.changes === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.json({ message: 'Datos actualizados correctamente', user: { id: userId, name, type } });
     });
 });
 
