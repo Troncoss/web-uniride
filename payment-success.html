@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MDH4585W');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniride - Confirmación de Pago</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: "#3B82F6", secondary: "#1E40AF", accent: "#10B981" },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gray-50 font-sans flex items-center justify-center">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MDH4585W"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <div class="max-w-md w-full mx-4">
+        <!-- Loading state -->
+        <div id="loadingState" class="bg-white rounded-2xl shadow-lg p-10 text-center">
+            <i class="fas fa-spinner fa-spin text-primary text-4xl mb-4"></i>
+            <p class="text-gray-600 text-lg">Verificando tu pago...</p>
+            <p class="text-gray-400 text-sm mt-2">Por favor espera unos segundos</p>
+        </div>
+
+        <!-- Success state -->
+        <div id="successState" class="bg-white rounded-2xl shadow-lg p-10 text-center hidden">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-check-circle text-green-500 text-4xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">¡Reserva Confirmada!</h1>
+            <p class="text-gray-600 mb-6">Tu pago ha sido procesado correctamente y tu plaza está reservada.</p>
+
+            <div id="successTripInfo" class="bg-blue-50 rounded-xl p-4 mb-6 text-left">
+                <!-- Filled by JS -->
+            </div>
+
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-sm text-yellow-800 text-left">
+                <i class="fas fa-info-circle mr-2"></i>
+                <strong>Recuerda:</strong> El pago al conductor se realiza en mano o por Bizum al subir al vehículo. Este cargo de Stripe confirma tu reserva.
+            </div>
+
+            <a href="index.html"
+               class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-secondary transition duration-200 flex items-center justify-center">
+                <i class="fas fa-home mr-2"></i>Ver mis viajes pendientes
+            </a>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="bg-white rounded-2xl shadow-lg p-10 text-center hidden">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-times-circle text-red-500 text-4xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Pago No Completado</h1>
+            <p id="errorMessage" class="text-gray-600 mb-2">El pago no pudo procesarse correctamente.</p>
+            <p id="errorDetail" class="text-gray-400 text-xs mb-6 font-mono"></p>
+            <a href="index.html"
+               class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-secondary transition duration-200 flex items-center justify-center">
+                <i class="fas fa-redo mr-2"></i>Volver e intentarlo de nuevo
+            </a>
+        </div>
+    </div>
+
+    <script>
+    const STRIPE_PUBLIC_KEY = 'pk_test_51TZqwzJxDtjZlWltpyIAC8RIhhMcgZPqqHsnNmFXohsYxE1baKoVyes88JN82p9QyDmE0kZGmH5a0tXnHF1IQQp900n9NI8h7K';
+    const stripe = Stripe(STRIPE_PUBLIC_KEY);
+
+    async function checkPaymentStatus() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const clientSecret = urlParams.get('payment_intent_client_secret');
+        const paymentIntentId = urlParams.get('payment_intent');
+
+        if (!clientSecret || !paymentIntentId) {
+            showError('No se encontraron datos del pago en la URL.', 'Redirige desde la app normalmente');
+            return;
+        }
+
+        try {
+            // Verify payment status directly with Stripe
+            const { paymentIntent, error: stripeError } = await stripe.retrievePaymentIntent(clientSecret);
+
+            if (stripeError) {
+                showError(stripeError.message, stripeError.code || '');
+                return;
+            }
+
+            if (paymentIntent.status === 'succeeded') {
+                // Get tripId and userId from PaymentIntent metadata (more reliable than localStorage)
+                const tripId = paymentIntent.metadata && paymentIntent.metadata.tripId
+                    ? paymentIntent.metadata.tripId
+                    : localStorage.getItem('stripe_pending_trip_id');
+
+                const userId = paymentIntent.metadata && paymentIntent.metadata.userId
+                    ? paymentIntent.metadata.userId
+                    : localStorage.getItem('stripe_pending_user_id');
+
+                // Fallback: also get from current logged-in user
+                const storedUser = localStorage.getItem('uniride_user');
+                const currentUser = storedUser ? JSON.parse(storedUser) : null;
+                const finalUserId = userId || (currentUser ? currentUser.id : null);
+
+                if (!tripId || !finalUserId) {
+                    showError(
+                        'Tu pago fue exitoso pero no pudimos registrar la reserva automáticamente.',
+                        `PaymentIntent: ${paymentIntentId} | Contacta soporte con este ID.`
+                    );
+                    return;
+                }
+
+                // Call our server to confirm payment and create reservation
+                const response = await fetch(`/api/trips/${tripId}/confirm-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentIntentId, userId: finalUserId })
+                });
+
+                const data = await response.json();
+
+                // Clean up localStorage regardless of result
+                localStorage.removeItem('stripe_pending_trip_id');
+                localStorage.removeItem('stripe_pending_user_id');
+
+                if (response.ok) {
+                    showSuccess(paymentIntent);
+                } else {
+                    showError(data.error || 'Error al registrar la reserva en el servidor.', `Trip: ${tripId}, Payment: ${paymentIntentId}`);
+                }
+
+            } else if (paymentIntent.status === 'processing') {
+                showError('Tu pago está siendo procesado por el banco.', 'Vuelve en unos minutos para comprobarlo.');
+            } else if (paymentIntent.status === 'requires_payment_method') {
+                showError('El pago fue cancelado o rechazado.', `Estado: ${paymentIntent.status}`);
+            } else {
+                showError(`El pago no se completó correctamente.`, `Estado: ${paymentIntent.status}`);
+            }
+
+        } catch (err) {
+            showError('Error de conexión al verificar el pago.', err.message);
+        }
+    }
+
+    function showSuccess(paymentIntent) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('successState').classList.remove('hidden');
+
+        const amount = (paymentIntent.amount / 100).toFixed(2);
+        const currency = paymentIntent.currency.toUpperCase();
+        const origin = paymentIntent.metadata?.origin || '—';
+        const destination = paymentIntent.metadata?.destination || '—';
+
+        document.getElementById('successTripInfo').innerHTML = `
+            <div class="space-y-2 text-sm text-gray-700">
+                <div class="flex items-center font-semibold text-gray-800 mb-2">
+                    <i class="fas fa-route text-primary mr-2"></i>
+                    ${origin} → ${destination}
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Importe pagado:</span>
+                    <span class="font-bold text-green-600">${amount} ${currency}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">ID de pago:</span>
+                    <span class="font-mono text-xs text-gray-400">${paymentIntent.id.slice(0, 25)}...</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function showError(message, detail) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('errorMessage').textContent = message;
+        if (detail) document.getElementById('errorDetail').textContent = detail;
+    }
+
+    // Run on load
+    checkPaymentStatus();
+    </script>
+</body>
+</html>
