@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MDH4585W');</script>
+    <!-- End Google Tag Manager -->
     <base target="_self">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,8 +33,14 @@
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Stripe.js - must load from Stripe CDN for PCI compliance -->
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body class="min-h-screen bg-gray-50 font-sans">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MDH4585W"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <!-- Main Dashboard Page -->
     <div id="dashboardPage" class="min-h-screen">
         <!-- Header -->
@@ -57,7 +70,7 @@
                         </div>
                     </div>
                     
-                    <!-- Center spacer (logo already absolute positioned) --> Right: Social & Logout -->
+                    <!-- Right: Social & Logout -->
                     <div class="flex items-center space-x-4">
                         <div class="hidden md:flex items-center space-x-3 text-gray-600">
                             <span class="text-sm">Contáctanos en:</span>
@@ -136,7 +149,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-                                <input type="date" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="date" id="tripDateInput" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
@@ -156,7 +169,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Precio por persona</label>
                             <div class="relative">
-                                <span class="absolute left-3 top-3 text-gray-500">$</span>
+                                <span class="absolute left-3 top-3 text-gray-500">€</span>
                                 <input type="number" required min="0" step="0.01" placeholder="0.00" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                             </div>
                         </div>
@@ -435,7 +448,7 @@
                 </div>
                 
                 <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                    <p>&copy; 2024 Uniride. Todos los derechos reservados.</p>
+                    <p>&copy; 2026 Uniride. Todos los derechos reservados.</p>
                 </div>
             </div>
         </footer>
@@ -477,6 +490,7 @@
         ];
 
         let availableTrips = [];
+        let userJoinedTripIds = new Set(); // Track trips the current user has already joined
 
         const recentTrips = [
             { 
@@ -531,25 +545,59 @@
         }
 
         function renderTripCards(items) {
-            if (items.length === 0) {
+            // Only show future trips in the available list
+            const today = new Date().toISOString().split('T')[0];
+            const futureItems = items.filter(t => t.date >= today);
+            if (futureItems.length === 0) {
                 return `<div class="text-center py-8 text-gray-500">
                     <i class="fas fa-search text-4xl mb-4"></i>
                     <p>No se encontraron viajes con esos criterios.</p>
                 </div>`;
             }
+            items = futureItems;
             
             return items.map(trip => {
                 const isOwner = trip.driver_id == currentUser.id;
-                const actionBtn = isOwner
-                    ? `<button class="w-full bg-red-100 text-red-600 py-3 rounded-lg font-medium hover:bg-red-200 transition duration-200 flex items-center justify-center cancel-trip-btn" data-trip-id="${trip.id}" data-role="driver">
+                const isFull = trip.seats <= 0;
+                const hasJoined = userJoinedTripIds.has(trip.id);
+
+                let actionBtn;
+                let cardExtra = '';
+
+                if (isOwner) {
+                    // Driver sees cancel button for their own trip
+                    actionBtn = `<button class="w-full bg-red-100 text-red-600 py-3 rounded-lg font-medium hover:bg-red-200 transition duration-200 flex items-center justify-center cancel-trip-btn" data-trip-id="${trip.id}" data-role="driver">
                         <i class="fas fa-times-circle mr-2"></i>Cancelar mi viaje
-                       </button>`
-                    : `<button class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 flex items-center justify-center join-trip-btn" data-trip-id="${trip.id}">
-                        <i class="fas fa-check-circle mr-2"></i>Unirse al Viaje
                        </button>`;
+                } else if (hasJoined) {
+                    // User already joined - red disabled state
+                    cardExtra = 'opacity-75';
+                    actionBtn = `<button disabled class="w-full bg-red-100 text-red-600 py-3 rounded-lg font-medium flex items-center justify-center cursor-not-allowed">
+                        <i class="fas fa-check-double mr-2"></i>Ya te has unido
+                       </button>`;
+                } else if (isFull) {
+                    // Trip is full - gray disabled state
+                    cardExtra = 'opacity-60 grayscale';
+                    actionBtn = `<button disabled class="w-full bg-gray-200 text-gray-500 py-3 rounded-lg font-medium flex items-center justify-center cursor-not-allowed">
+                        <i class="fas fa-ban mr-2"></i>Viaje Lleno
+                       </button>`;
+                } else {
+                    // Normal state - available to join and pay
+                    actionBtn = `<button class="w-full bg-accent text-white py-3 rounded-lg font-medium hover:bg-green-600 transition duration-200 flex items-center justify-center join-trip-btn"
+                            data-trip-id="${trip.id}"
+                            data-trip-price="${trip.price}"
+                            data-trip-origin="${trip.origin}"
+                            data-trip-destination="${trip.destination}"
+                            data-trip-date="${trip.date}"
+                            data-trip-time="${trip.time}"
+                            data-trip-driver="${trip.driver_name || ''}"
+                            data-trip-car="${trip.car || ''}">
+                         <i class="fas fa-credit-card mr-2"></i>Reservar y Pagar
+                        </button>`;
+                }
 
                 return `
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-primary transition duration-200">
+                <div class="bg-gray-50 rounded-xl p-6 border ${isFull ? 'border-gray-300 bg-gray-100' : hasJoined ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:border-primary'} transition duration-200 ${cardExtra}">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h4 class="font-bold text-lg text-gray-800">${trip.origin} → ${trip.destination}</h4>
@@ -563,14 +611,19 @@
                             <i class="fas fa-user text-gray-400 mr-3"></i>
                             <span>Conductor: ${trip.driver_name || trip.driver}</span>
                         </div>
-                        <div class="flex items-center text-gray-700">
+                        ${trip.car ? `<div class="flex items-center text-gray-700">
                             <i class="fas fa-car text-gray-400 mr-3"></i>
                             <span>${trip.car}</span>
+                        </div>` : ''}
                         </div>
                         <div class="flex items-center text-gray-700">
                             <i class="fas fa-users text-gray-400 mr-3"></i>
                             <span>${trip.seats} asiento${trip.seats !== 1 ? 's' : ''} disponible${trip.seats !== 1 ? 's' : ''}</span>
                         </div>
+                        ${trip.description ? `<div class="flex items-center text-gray-600 text-sm">
+                            <i class="fas fa-info-circle text-gray-400 mr-3"></i>
+                            <span>${trip.description}</span>
+                        </div>` : ''}
                     </div>
                     
                     ${actionBtn}
@@ -602,8 +655,13 @@
                     </div>
                     
                     ${isPending && trip.driver_id == currentUser.id ? `
-                        <button class="w-full mt-2 bg-red-100 text-red-600 py-2 rounded-lg font-medium hover:bg-red-200 transition duration-200 cancel-trip-btn" data-trip-id="${trip.id}" data-role="${trip.role}">
+                        <button class="w-full mt-2 bg-red-100 text-red-600 py-2 rounded-lg font-medium hover:bg-red-200 transition duration-200 cancel-trip-btn" data-trip-id="${trip.id}" data-role="driver">
                             <i class="fas fa-times-circle mr-2"></i>Cancelar Viaje
+                        </button>
+                    ` : ''}
+                    ${isPending && trip.role === 'traveler' ? `
+                        <button class="w-full mt-2 bg-orange-100 text-orange-600 py-2 rounded-lg font-medium hover:bg-orange-200 transition duration-200 cancel-trip-btn" data-trip-id="${trip.id}" data-role="traveler">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Abandonar Viaje
                         </button>
                     ` : ''}
                 </div>
@@ -864,11 +922,22 @@
                         fetch(`/api/users/${currentUser.id}/trips`)
                             .then(res => res.json())
                             .then(userTrips => {
-                                // Filter by user type: driver only sees their created trips, traveler only sees their reservations
-                                const roleTrips = userTrips.filter(t => {
-                                    if (currentUser.type === 'driver') return t.role === 'driver';
-                                    return t.role === 'traveler';
-                                });
+                                // Show ALL trips: both created trips (role=driver) and joined trips (role=traveler)
+                                // regardless of the user's account type
+                                const roleTrips = userTrips;
+
+                                // Track which trip IDs the user has joined as traveler
+                                userJoinedTripIds = new Set(
+                                    userTrips.filter(t => t.role === 'traveler').map(t => t.id)
+                                );
+
+                                // Re-render available trips now that we know joined trips
+                                const tripsList = document.getElementById('tripsList');
+                                if (tripsList) {
+                                    tripsList.innerHTML = renderTripCards(availableTrips);
+                                    bindJoinTripEvents();
+                                    bindCancelTripEvents();
+                                }
 
                                 const pendingTripsContainer = document.getElementById('pendingTrips');
                                 const pastTripsContainer = document.getElementById('pastTrips');
@@ -938,6 +1007,13 @@
             }
             
             function bindDashboardEvents() {
+                // Set min date on date input to today
+                const tripDateInput = document.getElementById('tripDateInput');
+                if (tripDateInput) {
+                    const today = new Date().toISOString().split('T')[0];
+                    tripDateInput.setAttribute('min', today);
+                }
+
                 // Seat counter
                 const seatDisplay = document.getElementById('seatCount');
                 document.querySelectorAll('.seat-btn').forEach(btn => {
@@ -964,6 +1040,13 @@
                         const price = inputs[4].value;
                         const carModel = document.getElementById('carModelInput').value;
                         const description = createTripForm.querySelector('textarea') ? createTripForm.querySelector('textarea').value : '';
+
+                        // Validate date is not in the past
+                        const today = new Date().toISOString().split('T')[0];
+                        if (date < today) {
+                            showNotification('No puedes crear un viaje para una fecha pasada', 'error');
+                            return;
+                        }
 
                         try {
                             const response = await fetch('/api/trips', {
@@ -1010,11 +1093,27 @@
                 function filterTrips() {
                     const searchTerm = searchInput.value.toLowerCase();
                     const activeFilter = document.querySelector('.filter-btn.bg-primary')?.dataset.filter || 'all';
+                    const today = new Date();
+                    const todayStr = today.toISOString().split('T')[0];
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                    const dayOfWeek = today.getDay(); // 0=Sun
+                    const satOffset = (6 - dayOfWeek + 7) % 7;
+                    const sat = new Date(today); sat.setDate(sat.getDate() + satOffset);
+                    const sun = new Date(sat); sun.setDate(sun.getDate() + 1);
+                    const satStr = sat.toISOString().split('T')[0];
+                    const sunStr = sun.toISOString().split('T')[0];
                     
                     const filtered = availableTrips.filter(trip => {
                         const matchesSearch = trip.origin.toLowerCase().includes(searchTerm) || 
                                              trip.destination.toLowerCase().includes(searchTerm);
-                        const matchesFilter = activeFilter === 'all' || trip.filter === activeFilter;
+                        let matchesFilter = true;
+                        if (activeFilter === 'today') matchesFilter = trip.date === todayStr;
+                        else if (activeFilter === 'tomorrow') matchesFilter = trip.date === tomorrowStr;
+                        else if (activeFilter === 'weekend') matchesFilter = trip.date === satStr || trip.date === sunStr;
+                        else if (activeFilter === 'cheap') matchesFilter = trip.price <= 5;
+                        else if (activeFilter === 'nearby') matchesFilter = trip.price <= 3;
                         return matchesSearch && matchesFilter;
                     });
                     
@@ -1022,6 +1121,7 @@
                     if (tripsList) {
                         tripsList.innerHTML = renderTripCards(filtered);
                         bindJoinTripEvents();
+                        bindCancelTripEvents();
                     }
                 }
                 
@@ -1204,25 +1304,25 @@
                 document.querySelectorAll('.join-trip-btn').forEach(btn => {
                     btn.addEventListener('click', async function() {
                         const tripId = this.dataset.tripId;
-                        
-                        try {
-                            const response = await fetch(`/api/trips/${tripId}/join`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ user_id: currentUser.id })
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (response.ok) {
-                                showNotification(data.message, 'success');
-                                initializeDashboardContent(); // Reload everything to update seats and lists
-                            } else {
-                                showNotification(data.error, 'error');
-                            }
-                        } catch (err) {
-                            showNotification('Error al intentar unirse al viaje', 'error');
-                        }
+                        const tripPrice = parseFloat(this.dataset.tripPrice);
+                        const tripOrigin = this.dataset.tripOrigin;
+                        const tripDestination = this.dataset.tripDestination;
+                        const tripDate = this.dataset.tripDate;
+                        const tripTime = this.dataset.tripTime;
+                        const tripDriver = this.dataset.tripDriver;
+                        const tripCar = this.dataset.tripCar;
+
+                        // Show payment modal with trip info
+                        openPaymentModal({
+                            id: tripId,
+                            price: tripPrice,
+                            origin: tripOrigin,
+                            destination: tripDestination,
+                            date: tripDate,
+                            time: tripTime,
+                            driver_name: tripDriver,
+                            car: tripCar
+                        });
                     });
                 });
             }
@@ -1311,15 +1411,160 @@
                 if (lnk) { ev.preventDefault(); showNotification('Enlace en desarrollo', 'info'); }
             });
 
-            const closeTermsModal = null;
-            const acceptTermsBtn = null;
+            const closeTermsModalBtn = document.getElementById('closeTermsModal');
+            const acceptTermsBtn = document.getElementById('acceptTermsBtn');
             function hideTermsModal() {
                 const termsModal = document.getElementById('termsModal');
                 if (termsModal) termsModal.classList.add('hidden');
             }
-            if (closeTermsModal) closeTermsModal.addEventListener('click', hideTermsModal);
+            if (closeTermsModalBtn) closeTermsModalBtn.addEventListener('click', hideTermsModal);
             if (acceptTermsBtn) acceptTermsBtn.addEventListener('click', hideTermsModal);
         });
+    </script>
+
+    <!-- ===== STRIPE PAYMENT MODAL ===== -->
+    <div id="stripePaymentModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-start justify-center z-50 p-4 overflow-y-auto hidden" style="backdrop-filter: blur(4px)">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full my-4">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Confirmar Reserva</h3>
+                        <p class="text-blue-200 text-sm mt-1">Pago seguro con Stripe</p>
+                    </div>
+                    <button id="closePaymentModal" class="text-white hover:text-blue-200 transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trip Summary -->
+            <div id="paymentTripSummary" class="px-6 py-4 bg-blue-50 border-b border-blue-100">
+                <!-- filled by JS -->
+            </div>
+
+            <!-- Stripe Payment Form -->
+            <div class="px-6 py-5">
+                <form id="stripePaymentForm">
+                    <div id="stripe-payment-element" class="mb-4">
+                        <!-- Stripe Elements mounts here -->
+                    </div>
+                    <div id="stripe-payment-errors" class="text-red-600 text-sm mb-3 hidden"></div>
+                    <button id="stripeSubmitBtn" type="submit"
+                            class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-lock mr-2"></i>
+                        <span id="stripeSubmitText">Pagar ahora</span>
+                    </button>
+                    <p class="text-center text-xs text-gray-400 mt-3">
+                        <i class="fas fa-shield-alt mr-1"></i>Pago 100% seguro procesado por Stripe. Tus datos nunca pasan por nuestros servidores.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ===== STRIPE PAYMENT MODAL LOGIC =====
+    const STRIPE_PUBLIC_KEY = 'pk_test_51TZqwzJxDtjZlWltpyIAC8RIhhMcgZPqqHsnNmFXohsYxE1baKoVyes88JN82p9QyDmE0kZGmH5a0tXnHF1IQQp900n9NI8h7K';
+    const stripeInstance = Stripe(STRIPE_PUBLIC_KEY);
+    let stripeElements = null;
+    let currentPaymentTripId = null;
+
+    async function openPaymentModal(trip) {
+        currentPaymentTripId = trip.id;
+
+        // Fill trip summary
+        document.getElementById('paymentTripSummary').innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-gray-800 text-lg">${trip.origin} → ${trip.destination}</p>
+                    <p class="text-gray-500 text-sm">${trip.date} a las ${trip.time}</p>
+                    ${trip.driver_name ? `<p class="text-gray-500 text-sm"><i class="fas fa-user mr-1"></i>${trip.driver_name}${trip.car ? ' · ' + trip.car : ''}</p>` : ''}
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-blue-700">${parseFloat(trip.price).toFixed(2)}€</p>
+                    <p class="text-xs text-gray-400">por persona</p>
+                </div>
+            </div>
+        `;
+
+        // Show modal and reset state
+        document.getElementById('stripePaymentModal').classList.remove('hidden');
+        document.getElementById('stripe-payment-element').innerHTML = '<div class="flex justify-center py-4"><i class="fas fa-spinner fa-spin text-blue-500 text-2xl"></i></div>';
+        document.getElementById('stripe-payment-errors').classList.add('hidden');
+        document.getElementById('stripeSubmitBtn').disabled = false;
+        document.getElementById('stripeSubmitText').textContent = 'Pagar ahora';
+
+        try {
+            // Get current user from localStorage
+            const user = JSON.parse(localStorage.getItem('uniride_user'));
+
+            // Request PaymentIntent from our server
+            const response = await fetch('/api/create-payment-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tripId: trip.id, userId: user.id })
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                document.getElementById('stripePaymentModal').classList.add('hidden');
+                // Use parent page notification if available
+                if (typeof showNotification === 'function') showNotification(data.error, 'error');
+                return;
+            }
+
+            // Store tripId for confirm step
+            localStorage.setItem('stripe_pending_trip_id', trip.id);
+            localStorage.setItem('stripe_pending_user_id', user.id);
+
+            // Initialize Stripe Elements
+            stripeElements = stripeInstance.elements({ clientSecret: data.clientSecret });
+            const paymentEl = stripeElements.create('payment', { layout: 'tabs' });
+            document.getElementById('stripe-payment-element').innerHTML = '';
+            paymentEl.mount('#stripe-payment-element');
+
+        } catch (err) {
+            document.getElementById('stripePaymentModal').classList.add('hidden');
+            if (typeof showNotification === 'function') showNotification('Error al iniciar el pago', 'error');
+        }
+    }
+
+    // Close modal
+    document.getElementById('closePaymentModal').addEventListener('click', () => {
+        document.getElementById('stripePaymentModal').classList.add('hidden');
+        stripeElements = null;
+    });
+
+    // Submit payment
+    document.getElementById('stripePaymentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!stripeElements) return;
+
+        const submitBtn = document.getElementById('stripeSubmitBtn');
+        const submitText = document.getElementById('stripeSubmitText');
+        submitBtn.disabled = true;
+        submitText.textContent = 'Procesando...';
+
+        // Determine return URL
+        const returnUrl = window.location.origin + '/payment-success.html';
+
+        const { error } = await stripeInstance.confirmPayment({
+            elements: stripeElements,
+            confirmParams: {
+                return_url: returnUrl
+            }
+        });
+
+        // Only reaches here if there's an immediate error
+        if (error) {
+            const errBox = document.getElementById('stripe-payment-errors');
+            errBox.textContent = error.message;
+            errBox.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitText.textContent = 'Pagar ahora';
+        }
+    });
     </script>
 </body>
 </html>
