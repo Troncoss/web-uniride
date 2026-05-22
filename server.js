@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -5,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +24,14 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } }); // 5M
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+// Fix: /webhook needs raw body for Stripe signature validation
+app.use((req, res, next) => {
+    if (req.originalUrl === '/api/webhook') {
+        next();
+    } else {
+        express.json()(req, res, next);
+    }
+});
 app.use(express.static(path.join(__dirname, 'html')));
 
 // Database Setup
@@ -78,6 +87,16 @@ const db = new sqlite3.Database('./uniride.sqlite', (err) => {
             FOREIGN KEY (trip_id) REFERENCES trips(id),
             FOREIGN KEY (user_id) REFERENCES users(id),
             UNIQUE(trip_id, user_id)
+        )`);
+        // Create payments table for Stripe payment tracking (idempotency)
+        db.run(`CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            payment_intent_id TEXT UNIQUE NOT NULL,
+            trip_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            amount INTEGER NOT NULL,
+            status TEXT DEFAULT 'pending',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
     }
 });
@@ -168,6 +187,12 @@ app.post('/api/trips', (req, res) => {
 
     if (!origin || !destination || !date || !time || !seats || !price || !driver_id || !driver_name) {
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
+    }
+
+    // Validate date is not in the past
+    const today = new Date().toISOString().split('T')[0];
+    if (date < today) {
+        return res.status(400).json({ error: 'No se pueden crear viajes para fechas pasadas' });
     }
 
     const sql = `INSERT INTO trips (origin, destination, date, time, seats, price, car, description, driver_id, driver_name)
@@ -363,6 +388,168 @@ app.put('/api/users/:id', (req, res) => {
         if (this.changes === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
         res.json({ message: 'Datos actualizados correctamente', user: { id: userId, name, type } });
     });
+});
+
+// --- STRIPE PAYMENT API ---
+
+// Create a PaymentIntent - called when user clicks "Unirse al Viaje"
+app.post('/api/create-payment-intent', async (req, res) => {
+    const { tripId, userId } = req.body;
+
+    if (!tripId || !userId) {
+        return res.status(400).json({ error: 'tripId y userId son obligatorios' });
+    }
+
+    // Get the REAL price from DB (never trust frontend price)
+    db.get('SELECT * FROM trips WHERE id = ?', [tripId], async (err, trip) => {
+        if (err || !trip) return res.status(404).json({ error: 'Viaje no encontrado' });
+        if (trip.seats <= 0) return res.status(400).json({ error: 'No quedan asientos disponibles' });
+        if (trip.driver_id == userId) return res.status(400).json({ error: 'No puedes unirte a tu propio viaje' });
+
+        // Check if user already has a reservation
+        db.get('SELECT id FROM reservations WHERE trip_id = ? AND user_id = ?', [tripId, userId], async (err, existing) => {
+            if (existing) return res.status(400).json({ error: 'Ya estás unido a este viaje' });
+
+            // Stripe amounts are in cents (euros × 100)
+            const amountInCents = Math.round(trip.price * 100);
+
+            try {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: amountInCents,
+                    currency: 'eur',
+                    automatic_payment_methods: { enabled: true },
+                    metadata: {
+                        tripId: String(tripId),
+                        userId: String(userId),
+                        origin: trip.origin,
+                        destination: trip.destination
+                    }
+                });
+
+                res.json({
+                    clientSecret: paymentIntent.client_secret,
+                    tripInfo: {
+                        origin: trip.origin,
+                        destination: trip.destination,
+                        date: trip.date,
+                        time: trip.time,
+                        price: trip.price,
+                        car: trip.car,
+                        driver_name: trip.driver_name
+                    }
+                });
+            } catch (error) {
+                console.error('Stripe error:', error);
+                res.status(500).json({ error: error.message });
+            }
+        });
+    });
+});
+
+// Confirm payment and create reservation - called from payment-success page
+app.post('/api/trips/:id/confirm-payment', async (req, res) => {
+    const tripId = req.params.id;
+    const { paymentIntentId, userId } = req.body;
+
+    if (!paymentIntentId || !userId) {
+        return res.status(400).json({ error: 'paymentIntentId y userId son obligatorios' });
+    }
+
+    // Idempotency: check if this payment was already processed
+    db.get('SELECT * FROM payments WHERE payment_intent_id = ?', [paymentIntentId], async (err, existingPayment) => {
+        if (existingPayment && existingPayment.status === 'succeeded') {
+            return res.json({ message: 'Reserva ya confirmada anteriormente', alreadyProcessed: true });
+        }
+
+        try {
+            // Verify with Stripe that payment actually succeeded
+            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+            if (paymentIntent.status !== 'succeeded') {
+                return res.status(400).json({ error: `El pago no ha sido completado. Estado: ${paymentIntent.status}` });
+            }
+
+            const amountInCents = paymentIntent.amount;
+
+            // Record payment in DB
+            db.run(
+                'INSERT OR IGNORE INTO payments (payment_intent_id, trip_id, user_id, amount, status) VALUES (?, ?, ?, ?, ?)',
+                [paymentIntentId, tripId, userId, amountInCents, 'succeeded'],
+                function(err) {
+                    // Create reservation
+                    db.run('INSERT INTO reservations (trip_id, user_id) VALUES (?, ?)', [tripId, userId], function(err) {
+                        if (err && err.message.includes('UNIQUE constraint failed')) {
+                            return res.json({ message: 'Reserva confirmada', alreadyProcessed: true });
+                        }
+                        if (err) return res.status(500).json({ error: 'Error al crear la reserva' });
+
+                        // Decrement seats
+                        db.run('UPDATE trips SET seats = seats - 1 WHERE id = ?', [tripId], function(err) {
+                            if (err) return res.status(500).json({ error: 'Error al actualizar asientos' });
+                            console.log(`>>> RESERVA CONFIRMADA: viaje ${tripId}, usuario ${userId}, pago ${paymentIntentId}`);
+                            res.json({ message: 'Reserva confirmada y pago procesado correctamente' });
+                        });
+                    });
+                }
+            );
+        } catch (error) {
+            console.error('Error confirming payment:', error);
+            res.status(500).json({ error: error.message });
+        }
+    });
+});
+
+// Stripe Webhook - server-to-server confirmation from Stripe
+app.post('/api/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    let event;
+
+    try {
+        if (webhookSecret && webhookSecret.length > 0) {
+            // Validate signature when webhook secret is configured
+            event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+        } else {
+            // No webhook secret configured yet (local dev)
+            event = JSON.parse(req.body.toString());
+        }
+    } catch (err) {
+        console.error('Webhook signature error:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    console.log(`>>> WEBHOOK evento: ${event.type}`);
+
+    if (event.type === 'payment_intent.succeeded') {
+        const pi = event.data.object;
+        const tripId = pi.metadata.tripId;
+        const userId = pi.metadata.userId;
+
+        // Idempotency check
+        db.get('SELECT id FROM payments WHERE payment_intent_id = ?', [pi.id], (err, existing) => {
+            if (existing) {
+                console.log(`>>> Webhook: pago ${pi.id} ya procesado, ignorando`);
+                return;
+            }
+            // Record payment
+            db.run(
+                'INSERT OR IGNORE INTO payments (payment_intent_id, trip_id, user_id, amount, status) VALUES (?, ?, ?, ?, ?)',
+                [pi.id, tripId, userId, pi.amount, 'succeeded']
+            );
+            console.log(`>>> Webhook: pago ${pi.id} registrado correctamente`);
+        });
+    }
+
+    if (event.type === 'payment_intent.payment_failed') {
+        const pi = event.data.object;
+        console.log(`>>> Webhook: pago fallido ${pi.id}`);
+        db.run(
+            'INSERT OR IGNORE INTO payments (payment_intent_id, trip_id, user_id, amount, status) VALUES (?, ?, ?, ?, ?)',
+            [pi.id, pi.metadata.tripId, pi.metadata.userId, pi.amount, 'failed']
+        );
+    }
+
+    res.json({ received: true });
 });
 
 // Start Server
