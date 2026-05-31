@@ -51,6 +51,52 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Stripe.js - must load from Stripe CDN for PCI compliance -->
     <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* Street autocomplete dropdown */
+        .autocomplete-wrapper { position: relative; }
+        .autocomplete-list {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0; right: 0;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 9999;
+            display: none;
+        }
+        .autocomplete-list.open { display: block; }
+        .autocomplete-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #374151;
+            transition: background 0.15s;
+        }
+        .autocomplete-item:hover, .autocomplete-item.active {
+            background: #eff6ff;
+        }
+        .autocomplete-item i {
+            color: #9ca3af;
+            width: 16px;
+            flex-shrink: 0;
+        }
+        .autocomplete-item .ac-name { font-weight: 500; color: #111827; }
+        .autocomplete-item .ac-detail { color: #6b7280; font-size: 0.78rem; }
+        .autocomplete-loading {
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-gray-50 font-sans">
     <!-- Google Tag Manager (noscript) -->
@@ -152,13 +198,15 @@
                     
                     <form id="createTripForm" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
+                            <div class="autocomplete-wrapper">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Origen</label>
-                                <input type="text" required placeholder="Ciudad de origen" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="text" id="originInput" required placeholder="Calle de salida en Córdoba..." autocomplete="off" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <div class="autocomplete-list" id="originList"></div>
                             </div>
-                            <div>
+                            <div class="autocomplete-wrapper">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
-                                <input type="text" required placeholder="Ciudad de destino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="text" id="destinationInput" required placeholder="Calle de destino en Córdoba..." autocomplete="off" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <div class="autocomplete-list" id="destinationList"></div>
                             </div>
                         </div>
                         
@@ -1655,6 +1703,139 @@
             submitText.textContent = 'Pagar ahora';
         }
     });
+    </script>
+
+    <!-- Street Autocomplete for Córdoba using OpenStreetMap Nominatim -->
+    <script>
+    (function() {
+        let debounceTimers = {};
+
+        function setupAutocomplete(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+            if (!input || !list) return;
+
+            let currentIndex = -1;
+            let currentResults = [];
+
+            input.addEventListener('input', function() {
+                const query = this.value.trim();
+                clearTimeout(debounceTimers[inputId]);
+
+                if (query.length < 2) {
+                    closeList();
+                    return;
+                }
+
+                // Show loading
+                list.innerHTML = '<div class="autocomplete-loading"><i class="fas fa-spinner fa-spin"></i> Buscando calles...</div>';
+                list.classList.add('open');
+
+                debounceTimers[inputId] = setTimeout(async () => {
+                    try {
+                        // Nominatim API: search restricted to Córdoba, Spain
+                        const url = `https://nominatim.openstreetmap.org/search?` +
+                            `q=${encodeURIComponent(query + ', Córdoba, España')}&` +
+                            `format=json&addressdetails=1&limit=8&` +
+                            `countrycodes=es&` +
+                            `viewbox=-4.85,37.95,-4.65,37.82&bounded=1&` +
+                            `accept-language=es`;
+
+                        const res = await fetch(url, {
+                            headers: { 'Accept-Language': 'es' }
+                        });
+                        const data = await res.json();
+
+                        currentResults = data;
+                        currentIndex = -1;
+
+                        if (data.length === 0) {
+                            list.innerHTML = '<div class="autocomplete-loading"><i class="fas fa-map-marker-alt"></i> No se encontraron resultados en Córdoba</div>';
+                            return;
+                        }
+
+                        list.innerHTML = data.map((item, i) => {
+                            // Build a clean display name
+                            const addr = item.address || {};
+                            const street = addr.road || addr.pedestrian || addr.path || item.display_name.split(',')[0];
+                            const neighbourhood = addr.neighbourhood || addr.suburb || addr.quarter || '';
+                            const detail = neighbourhood ? `${neighbourhood}, Córdoba` : 'Córdoba';
+
+                            return `<div class="autocomplete-item" data-index="${i}" data-value="${street}, ${detail}">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div>
+                                    <div class="ac-name">${street}</div>
+                                    <div class="ac-detail">${detail}</div>
+                                </div>
+                            </div>`;
+                        }).join('');
+
+                        // Bind click events
+                        list.querySelectorAll('.autocomplete-item').forEach(item => {
+                            item.addEventListener('mousedown', function(e) {
+                                e.preventDefault();
+                                input.value = this.dataset.value;
+                                closeList();
+                            });
+                        });
+
+                    } catch (err) {
+                        list.innerHTML = '<div class="autocomplete-loading"><i class="fas fa-exclamation-circle"></i> Error al buscar. Inténtalo de nuevo.</div>';
+                    }
+                }, 300);
+            });
+
+            // Keyboard navigation
+            input.addEventListener('keydown', function(e) {
+                const items = list.querySelectorAll('.autocomplete-item');
+                if (!items.length) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentIndex = Math.min(currentIndex + 1, items.length - 1);
+                    updateActive(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentIndex = Math.max(currentIndex - 1, 0);
+                    updateActive(items);
+                } else if (e.key === 'Enter' && currentIndex >= 0) {
+                    e.preventDefault();
+                    input.value = items[currentIndex].dataset.value;
+                    closeList();
+                } else if (e.key === 'Escape') {
+                    closeList();
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                // Small delay so mousedown on item fires first
+                setTimeout(closeList, 150);
+            });
+
+            function updateActive(items) {
+                items.forEach((item, i) => {
+                    item.classList.toggle('active', i === currentIndex);
+                });
+            }
+
+            function closeList() {
+                list.classList.remove('open');
+                list.innerHTML = '';
+                currentIndex = -1;
+            }
+        }
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAutocomplete('originInput', 'originList');
+            setupAutocomplete('destinationInput', 'destinationList');
+        });
+        // Also run immediately in case DOM is already loaded
+        if (document.readyState !== 'loading') {
+            setupAutocomplete('originInput', 'originList');
+            setupAutocomplete('destinationInput', 'destinationList');
+        }
+    })();
     </script>
 </body>
 </html>
