@@ -6,13 +6,29 @@
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-MDH4585W');</script>
+    })(window,document,'script','dataLayer','GTM-T66T4J34');</script>
     <!-- End Google Tag Manager -->
     <base target="_self">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uniride - Viajes Compartidos</title>
-    <meta name="description" content="Plataforma para compartir viajes entre conductores y viajeros">
+    <title>Uniride - Viajes Compartidos entre Universitarios</title>
+    <meta name="description" content="Uniride conecta conductores y viajeros universitarios para compartir viajes de forma económica y sostenible en Córdoba y alrededores.">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="uniride_logo.png">
+    <link rel="apple-touch-icon" href="uniride_logo.png">
+    <!-- Open Graph (para WhatsApp, redes sociales y buscadores) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://uniride.me/">
+    <meta property="og:title" content="Uniride - Viajes Compartidos entre Universitarios">
+    <meta property="og:description" content="Comparte viaje, reduce gastos. La plataforma de carpooling universitaria de Córdoba.">
+    <meta property="og:image" content="https://uniride.me/uniride_logo.png">
+    <meta property="og:locale" content="es_ES">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@_UniRide_">
+    <meta name="twitter:title" content="Uniride - Viajes Compartidos">
+    <meta name="twitter:description" content="Comparte viaje, reduce gastos. La plataforma de carpooling universitaria de Córdoba.">
+    <meta name="twitter:image" content="https://uniride.me/uniride_logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
@@ -38,7 +54,7 @@
 </head>
 <body class="min-h-screen bg-gray-50 font-sans">
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MDH4585W"
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T66T4J34"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <!-- Main Dashboard Page -->
@@ -213,7 +229,7 @@
                             </button>
                         </div>
                         
-                        <div class="flex flex-wrap gap-2 mb-6">
+                        <div class="flex flex-wrap gap-2 mb-4">
                             <button class="filter-btn px-4 py-2 bg-primary text-white rounded-lg text-sm" data-filter="all">Todos</button>
                             <!-- Filter buttons will be rendered here -->
                         </div>
@@ -224,7 +240,16 @@
                     </div>
                     
                     <div class="mt-6 text-center">
-                        <p class="text-gray-600 text-sm">¿No encuentras lo que buscas? <a href="#" class="text-primary hover:underline">Filtra por fecha específica</a></p>
+                        <p class="text-gray-600 text-sm">¿No encuentras lo que buscas?
+                            <button id="toggleDatePicker" class="text-primary hover:underline font-medium"><i class="fas fa-calendar-alt mr-1"></i>Filtrar por fecha exacta</button>
+                        </p>
+                        <div id="datePicker" class="hidden mt-3 flex items-center justify-center gap-2">
+                            <input type="date" id="specificDateFilter"
+                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <button id="clearDateFilter" class="px-3 py-2 text-sm text-gray-500 hover:text-red-500 transition hidden">
+                                <i class="fas fa-times-circle mr-1"></i>Limpiar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1109,7 +1134,11 @@
                         const matchesSearch = trip.origin.toLowerCase().includes(searchTerm) || 
                                              trip.destination.toLowerCase().includes(searchTerm);
                         let matchesFilter = true;
-                        if (activeFilter === 'today') matchesFilter = trip.date === todayStr;
+                        const specificDate = document.getElementById('specificDateFilter')?.value;
+                        if (specificDate) {
+                            // Specific date overrides quick-filter buttons
+                            matchesFilter = trip.date === specificDate;
+                        } else if (activeFilter === 'today') matchesFilter = trip.date === todayStr;
                         else if (activeFilter === 'tomorrow') matchesFilter = trip.date === tomorrowStr;
                         else if (activeFilter === 'weekend') matchesFilter = trip.date === satStr || trip.date === sunStr;
                         else if (activeFilter === 'cheap') matchesFilter = trip.price <= 5;
@@ -1130,15 +1159,76 @@
                     searchBtn.addEventListener('click', filterTrips);
                 }
                 
-                if (filterButtons.length > 0) {
-                    filterButtons.forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            filterButtons.forEach(b => b.classList.remove('bg-primary', 'text-white'));
-                            filterButtons.forEach(b => b.classList.add('bg-gray-100', 'text-gray-700'));
-                            btn.classList.remove('bg-gray-100', 'text-gray-700');
-                            btn.classList.add('bg-primary', 'text-white');
-                            filterTrips();
+                // Use event delegation on the filter container so ALL buttons (Todos + dynamic) work
+                const filterContainer = document.querySelector('.flex.flex-wrap.gap-2.mb-4');
+                if (filterContainer) {
+                    filterContainer.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.filter-btn');
+                        if (!btn) return;
+                        // Clear date picker when a quick filter is clicked
+                        const sdf = document.getElementById('specificDateFilter');
+                        const cdf = document.getElementById('clearDateFilter');
+                        if (sdf) sdf.value = '';
+                        if (cdf) cdf.classList.add('hidden');
+                        // Update active style
+                        filterContainer.querySelectorAll('.filter-btn').forEach(b => {
+                            b.classList.remove('bg-primary', 'text-white');
+                            b.classList.add('bg-gray-100', 'text-gray-700');
                         });
+                        btn.classList.remove('bg-gray-100', 'text-gray-700');
+                        btn.classList.add('bg-primary', 'text-white');
+                        filterTrips();
+                    });
+                }
+
+                // Toggle date picker visibility
+                const toggleDatePicker = document.getElementById('toggleDatePicker');
+                const datePicker = document.getElementById('datePicker');
+                if (toggleDatePicker && datePicker) {
+                    toggleDatePicker.addEventListener('click', () => {
+                        datePicker.classList.toggle('hidden');
+                        if (!datePicker.classList.contains('hidden')) {
+                            document.getElementById('specificDateFilter')?.focus();
+                        }
+                    });
+                }
+
+                // Specific date filter change
+                const specificDateFilter = document.getElementById('specificDateFilter');
+                const clearDateFilter = document.getElementById('clearDateFilter');
+                if (specificDateFilter) {
+                    specificDateFilter.addEventListener('change', () => {
+                        if (specificDateFilter.value) {
+                            // Deactivate quick-filter buttons visually
+                            document.querySelectorAll('.filter-btn').forEach(b => {
+                                b.classList.remove('bg-primary', 'text-white');
+                                b.classList.add('bg-gray-100', 'text-gray-700');
+                            });
+                            if (clearDateFilter) clearDateFilter.classList.remove('hidden');
+                        } else {
+                            if (clearDateFilter) clearDateFilter.classList.add('hidden');
+                            // Reactivate 'Todos'
+                            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+                            if (allBtn) {
+                                allBtn.classList.add('bg-primary', 'text-white');
+                                allBtn.classList.remove('bg-gray-100', 'text-gray-700');
+                            }
+                        }
+                        filterTrips();
+                    });
+                }
+                if (clearDateFilter) {
+                    clearDateFilter.addEventListener('click', () => {
+                        if (specificDateFilter) specificDateFilter.value = '';
+                        clearDateFilter.classList.add('hidden');
+                        if (datePicker) datePicker.classList.add('hidden');
+                        // Reactivate 'Todos'
+                        const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+                        if (allBtn) {
+                            allBtn.classList.add('bg-primary', 'text-white');
+                            allBtn.classList.remove('bg-gray-100', 'text-gray-700');
+                        }
+                        filterTrips();
                     });
                 }
                 
