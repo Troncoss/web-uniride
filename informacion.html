@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T66T4J34');</script>
+    <!-- End Google Tag Manager -->
     <base target="_self">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,6 +40,10 @@
     </style>
 </head>
 <body class="min-h-screen bg-gray-50 font-sans">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T66T4J34"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4">
@@ -60,6 +71,28 @@
         
         <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 space-y-12">
             
+            <!-- Nuevas Funcionalidades -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold text-purple-600 border-b pb-2 mb-6 flex items-center">
+                    <i class="fas fa-star mr-3"></i>Funcionalidades Destacadas
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-purple-50 p-6 rounded-xl border border-purple-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2"><i class="fas fa-credit-card text-purple-500 mr-2"></i>Pagos Seguros con Stripe</h3>
+                        <p class="text-gray-600 text-sm">Reserva tu plaza pagando de forma segura con tarjeta a través de Stripe. Si el viaje se cancela, el dinero se devuelve automáticamente a tu cuenta.</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2"><i class="fas fa-map-marked-alt text-blue-500 mr-2"></i>Rutas en Mapa Interactivos</h3>
+                        <p class="text-gray-600 text-sm">Visualiza la ruta exacta de cualquier viaje antes de unirte. Nuestro mapa integrado te muestra el trayecto desde el origen hasta el destino.</p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-xl border border-green-100 md:col-span-2">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2"><i class="fas fa-camera-retro text-green-500 mr-2"></i>Galería Social de Viajes</h3>
+                        <p class="text-gray-600 text-sm">Comparte los mejores momentos de tus trayectos. Sube fotos, da 'Me gusta' a las imágenes de otros usuarios y comenta en tiempo real en nuestra ventana interactiva al más puro estilo Instagram.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Para Conductores -->
             <div>
                 <h2 class="text-2xl font-bold text-primary border-b pb-2 mb-6 flex items-center">
@@ -106,7 +139,7 @@
                         </div>
                         <div>
                             <strong class="text-gray-800 block mb-1">¿Cómo cobro el viaje?</strong>
-                            <p class="text-gray-600">Actualmente, los pagos se realizan directamente entre usuarios en efectivo o por Bizum al iniciar el viaje. Próximamente se integrarán pagos automáticos.</p>
+                            <p class="text-gray-600">Uniride cuenta con integración completa de Stripe. Cuando un viajero reserva, el pago se procesa con tarjeta. El dinero se transferirá automáticamente a tu saldo de conductor tras completar el viaje con éxito.</p>
                         </div>
                     </div>
                 </section>
@@ -130,12 +163,12 @@
                 </section>
 
                 <section id="cancelacion" class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Política de cancelación</h3>
-                    <p class="text-gray-600 mb-2">Para mantener una comunidad fiable, pedimos responsabilidad al cancelar:</p>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Política de cancelación y Reembolsos</h3>
+                    <p class="text-gray-600 mb-2">Para mantener una comunidad fiable, pedimos responsabilidad al cancelar. Nuestra integración con Stripe protege tus pagos:</p>
                     <ul class="list-disc pl-5 text-gray-600 space-y-1 mt-2">
-                        <li>Si necesitas cancelar tu viaje, avisa con al menos <strong>1 hora de antelación</strong>.</li>
-                        <li>Las cancelaciones de última hora o no presentarse sin avisar pueden afectar negativamente tu valoración.</li>
-                        <li>Si el conductor cancela el viaje, el sistema te notificará de inmediato.</li>
+                        <li>Si necesitas cancelar tu viaje, avisa con al menos <strong>1 hora de antelación</strong>. El sistema procesará el reembolso automáticamente a tu tarjeta de crédito/débito.</li>
+                        <li>Si el conductor cancela el viaje entero, el sistema te notificará de inmediato y todos los viajeros recibirán su reembolso íntegro.</li>
+                        <li>Las cancelaciones abusivas de última hora sin justificación pueden afectar negativamente tu valoración y penalizar tu saldo.</li>
                     </ul>
                 </section>
 
