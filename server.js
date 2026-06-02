@@ -57,6 +57,7 @@ const db = new sqlite3.Database('./uniride.sqlite', (err) => {
             time TEXT NOT NULL,
             seats INTEGER NOT NULL,
             price REAL NOT NULL,
+            recommended_price REAL,
             car TEXT,
             description TEXT,
             driver_id INTEGER NOT NULL,
@@ -64,6 +65,13 @@ const db = new sqlite3.Database('./uniride.sqlite', (err) => {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (driver_id) REFERENCES users(id)
         )`);
+        
+        // Add columns to existing table if not exists
+        db.run(`ALTER TABLE trips ADD COLUMN recommended_price REAL`, (err) => {});
+        db.run(`ALTER TABLE trips ADD COLUMN origin_lat REAL`, (err) => {});
+        db.run(`ALTER TABLE trips ADD COLUMN origin_lng REAL`, (err) => {});
+        db.run(`ALTER TABLE trips ADD COLUMN dest_lat REAL`, (err) => {});
+        db.run(`ALTER TABLE trips ADD COLUMN dest_lng REAL`, (err) => {});
         // Create photos table if it doesn't exist
         db.run(`CREATE TABLE IF NOT EXISTS photos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,6 +85,29 @@ const db = new sqlite3.Database('./uniride.sqlite', (err) => {
             likes INTEGER DEFAULT 0,
             comments INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Create photo_likes table
+        db.run(`CREATE TABLE IF NOT EXISTS photo_likes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            photo_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (photo_id) REFERENCES photos(id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(photo_id, user_id)
+        )`);
+
+        // Create photo_comments table
+        db.run(`CREATE TABLE IF NOT EXISTS photo_comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            photo_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            user_name TEXT NOT NULL,
+            comment TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (photo_id) REFERENCES photos(id),
+            FOREIGN KEY (user_id) REFERENCES users(id)
         )`);
         // Create reservations table if it doesn't exist
         db.run(`CREATE TABLE IF NOT EXISTS reservations (
@@ -98,6 +129,26 @@ const db = new sqlite3.Database('./uniride.sqlite', (err) => {
             status TEXT DEFAULT 'pending',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        // Create audit_logs table
+        db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            action TEXT NOT NULL,
+            entity TEXT NOT NULL,
+            entity_id INTEGER,
+            details TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Create triggers for audit logging
+        db.run(`CREATE TRIGGER IF NOT EXISTS log_user_insert AFTER INSERT ON users BEGIN INSERT INTO audit_logs (action, entity, entity_id, details) VALUES ('CREATE', 'user', NEW.id, 'Se registró el usuario: ' || NEW.name || ' (' || NEW.email || ')'); END;`);
+        db.run(`CREATE TRIGGER IF NOT EXISTS log_user_delete AFTER DELETE ON users BEGIN INSERT INTO audit_logs (action, entity, entity_id, details) VALUES ('DELETE', 'user', OLD.id, 'Se eliminó el usuario: ' || OLD.name); END;`);
+        
+        db.run(`CREATE TRIGGER IF NOT EXISTS log_trip_insert AFTER INSERT ON trips BEGIN INSERT INTO audit_logs (action, entity, entity_id, details) VALUES ('CREATE', 'trip', NEW.id, 'Viaje publicado: ' || NEW.origin || ' a ' || NEW.destination || ' por ' || NEW.driver_name); END;`);
+        db.run(`CREATE TRIGGER IF NOT EXISTS log_trip_delete AFTER DELETE ON trips BEGIN INSERT INTO audit_logs (action, entity, entity_id, details) VALUES ('DELETE', 'trip', OLD.id, 'Viaje eliminado: ' || OLD.origin || ' a ' || OLD.destination); END;`);
+        
+        db.run(`CREATE TRIGGER IF NOT EXISTS log_reservation_insert AFTER INSERT ON reservations BEGIN INSERT INTO audit_logs (action, entity, entity_id, details) VALUES ('CREATE', 'reservation', NEW.id, 'Nueva reserva de usuario ' || NEW.user_id || ' para el viaje ' || NEW.trip_id); END;`);
+        db.run(`CREATE TRIGGER IF NOT EXISTS log_reservation_delete AFTER DELETE ON reservations BEGIN INSERT INTO audit_logs (action, entity, entity_id, details) VALUES ('DELETE', 'reservation', OLD.id, 'Reserva cancelada del usuario ' || OLD.user_id || ' para el viaje ' || OLD.trip_id); END;`);
     }
 });
 
@@ -183,7 +234,7 @@ app.get('/api/trips', (req, res) => {
 // Create a trip
 app.post('/api/trips', (req, res) => {
     console.log('>>> VIAJE recibido:', req.body);
-    const { origin, destination, date, time, seats, price, car, description, driver_id, driver_name } = req.body;
+    const { origin, destination, date, time, seats, price, recommended_price, car, description, driver_id, driver_name, origin_lat, origin_lng, dest_lat, dest_lng } = req.body;
 
     if (!origin || !destination || !date || !time || !seats || !price || !driver_id || !driver_name) {
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -195,40 +246,59 @@ app.post('/api/trips', (req, res) => {
         return res.status(400).json({ error: 'No se pueden crear viajes para fechas pasadas' });
     }
 
-    const sql = `INSERT INTO trips (origin, destination, date, time, seats, price, car, description, driver_id, driver_name)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    db.run(sql, [origin, destination, date, time, seats, price, car || '', description || '', driver_id, driver_name], function(err) {
+    const sql = `INSERT INTO trips (origin, destination, date, time, seats, price, recommended_price, car, description, driver_id, driver_name, origin_lat, origin_lng, dest_lat, dest_lng)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    db.run(sql, [origin, destination, date, time, seats, price, recommended_price || null, car || '', description || '', driver_id, driver_name, origin_lat || null, origin_lng || null, dest_lat || null, dest_lng || null], function(err) {
         if (err) {
             return res.status(500).json({ error: 'Error al crear el viaje' });
         }
         res.status(201).json({
             message: 'Viaje creado correctamente',
-            trip: { id: this.lastID, origin, destination, date, time, seats, price, car, description, driver_id, driver_name }
+            trip: { id: this.lastID, origin, destination, date, time, seats, price, recommended_price, car, description, driver_id, driver_name }
         });
     });
 });
 
 // Delete a trip (driver cancels trip)
-app.delete('/api/trips/:id', (req, res) => {
+app.delete('/api/trips/:id', async (req, res) => {
     const tripId = req.params.id;
     const userId = req.body.user_id;
 
     if (!userId) return res.status(400).json({ error: 'user_id es requerido' });
 
     // Verify ownership
-    db.get(`SELECT driver_id FROM trips WHERE id = ?`, [tripId], (err, trip) => {
+    db.get(`SELECT driver_id FROM trips WHERE id = ?`, [tripId], async (err, trip) => {
         if (err) return res.status(500).json({ error: 'Error al buscar el viaje' });
         if (!trip) return res.status(404).json({ error: 'Viaje no encontrado' });
         if (trip.driver_id != userId) return res.status(403).json({ error: 'No tienes permiso para cancelar este viaje' });
 
-        // Delete reservations first
-        db.run(`DELETE FROM reservations WHERE trip_id = ?`, [tripId], function(err) {
-            if (err) return res.status(500).json({ error: 'Error al cancelar reservas' });
+        // Process Refunds for all reservations in this trip
+        db.all(`SELECT id, payment_intent_id FROM payments WHERE trip_id = ? AND status = 'succeeded'`, [tripId], async (err, payments) => {
+            if (err) console.error('Error fetching payments for refund:', err);
             
-            // Delete trip
-            db.run(`DELETE FROM trips WHERE id = ?`, [tripId], function(err) {
-                if (err) return res.status(500).json({ error: 'Error al eliminar el viaje' });
-                res.json({ message: 'Viaje eliminado' });
+            if (payments && payments.length > 0) {
+                for (const payment of payments) {
+                    try {
+                        console.log(`Procesando reembolso para el pago ${payment.payment_intent_id}`);
+                        await stripe.refunds.create({ payment_intent: payment.payment_intent_id });
+                        db.run(`UPDATE payments SET status = 'refunded' WHERE id = ?`, [payment.id]);
+                        console.log(`Reembolso exitoso para el pago ${payment.payment_intent_id}`);
+                    } catch (refundError) {
+                        console.error(`Error al reembolsar el pago ${payment.payment_intent_id}:`, refundError.message);
+                        // Continue even if one refund fails
+                    }
+                }
+            }
+
+            // Delete reservations first
+            db.run(`DELETE FROM reservations WHERE trip_id = ?`, [tripId], function(err) {
+                if (err) return res.status(500).json({ error: 'Error al cancelar reservas' });
+                
+                // Delete trip
+                db.run(`DELETE FROM trips WHERE id = ?`, [tripId], function(err) {
+                    if (err) return res.status(500).json({ error: 'Error al eliminar el viaje' });
+                    res.json({ message: 'Viaje eliminado y pagos reembolsados (si aplicaba)' });
+                });
             });
         });
     });
@@ -266,20 +336,37 @@ app.post('/api/trips/:id/join', (req, res) => {
 });
 
 // Cancel reservation (traveler cancels)
-app.post('/api/trips/:id/cancel', (req, res) => {
+app.post('/api/trips/:id/cancel', async (req, res) => {
     const tripId = req.params.id;
     const userId = req.body.user_id;
 
     if (!userId) return res.status(400).json({ error: 'user_id es requerido' });
 
-    db.run(`DELETE FROM reservations WHERE trip_id = ? AND user_id = ?`, [tripId, userId], function(err) {
-        if (err) return res.status(500).json({ error: 'Error al cancelar la reserva' });
-        if (this.changes === 0) return res.status(404).json({ error: 'Reserva no encontrada' });
+    // Process Refund for this user's reservation
+    db.get(`SELECT id, payment_intent_id FROM payments WHERE trip_id = ? AND user_id = ? AND status = 'succeeded'`, [tripId, userId], async (err, payment) => {
+        if (err) console.error('Error fetching payment for refund:', err);
 
-        // Increment seats
-        db.run(`UPDATE trips SET seats = seats + 1 WHERE id = ?`, [tripId], function(err) {
-            if (err) return res.status(500).json({ error: 'Error al actualizar asientos' });
-            res.json({ message: 'Reserva cancelada exitosamente' });
+        if (payment) {
+            try {
+                console.log(`Procesando reembolso para el pago ${payment.payment_intent_id}`);
+                await stripe.refunds.create({ payment_intent: payment.payment_intent_id });
+                db.run(`UPDATE payments SET status = 'refunded' WHERE id = ?`, [payment.id]);
+                console.log(`Reembolso exitoso para el pago ${payment.payment_intent_id}`);
+            } catch (refundError) {
+                console.error(`Error al reembolsar el pago ${payment.payment_intent_id}:`, refundError.message);
+                // Continue even if refund fails
+            }
+        }
+
+        db.run(`DELETE FROM reservations WHERE trip_id = ? AND user_id = ?`, [tripId, userId], function(err) {
+            if (err) return res.status(500).json({ error: 'Error al cancelar la reserva' });
+            if (this.changes === 0) return res.status(404).json({ error: 'Reserva no encontrada' });
+
+            // Increment seats
+            db.run(`UPDATE trips SET seats = seats + 1 WHERE id = ?`, [tripId], function(err) {
+                if (err) return res.status(500).json({ error: 'Error al actualizar asientos' });
+                res.json({ message: 'Reserva cancelada exitosamente y dinero reembolsado (si aplicaba)' });
+            });
         });
     });
 });
@@ -305,13 +392,33 @@ app.get('/api/users/:id/trips', (req, res) => {
     });
 });
 
+// Get user liked photos
+app.get('/api/users/:id/photo_likes', (req, res) => {
+    db.all(`SELECT photo_id FROM photo_likes WHERE user_id = ?`, [req.params.id], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error al obtener likes' });
+        res.json(rows.map(r => r.photo_id));
+    });
+});
+
 // --- PHOTOS API ---
 
 // Get all photos
 app.get('/api/photos', (req, res) => {
-    db.all(`SELECT * FROM photos ORDER BY created_at DESC`, (err, rows) => {
+    const sql = `
+        SELECT p.*, 
+        (SELECT COUNT(*) FROM photo_likes WHERE photo_id = p.id) as likes_count,
+        (SELECT COUNT(*) FROM photo_comments WHERE photo_id = p.id) as comments_count
+        FROM photos p 
+        ORDER BY p.created_at DESC
+    `;
+    db.all(sql, (err, rows) => {
         if (err) return res.status(500).json({ error: 'Error al obtener las fotos' });
-        res.json(rows);
+        // Map dynamic counts to the old fields to maintain frontend compatibility
+        res.json(rows.map(row => ({
+            ...row,
+            likes: row.likes_count,
+            comments: row.comments_count
+        })));
     });
 });
 
@@ -336,32 +443,60 @@ app.post('/api/photos', upload.single('photo'), (req, res) => {
     });
 });
 
-// Like a photo
+// Toggle Like on photo
 app.post('/api/photos/:id/like', (req, res) => {
     const photoId = req.params.id;
-    const action = req.body.action || 'like';
-    const increment = action === 'like' ? 1 : -1;
-    
-    db.run(`UPDATE photos SET likes = MAX(0, likes + ?) WHERE id = ?`, [increment, photoId], function(err) {
-        if (err) return res.status(500).json({ error: 'Error al actualizar likes' });
-        db.get(`SELECT likes FROM photos WHERE id = ?`, [photoId], (err, row) => {
-            if (err || !row) return res.status(500).json({ error: 'Error' });
-            res.json({ likes: row.likes });
+    const userId = req.body.user_id;
+
+    if (!userId) return res.status(400).json({ error: 'user_id es requerido' });
+
+    db.get(`SELECT id FROM photo_likes WHERE photo_id = ? AND user_id = ?`, [photoId, userId], (err, row) => {
+        if (err) return res.status(500).json({ error: 'Error' });
+
+        if (row) {
+            db.run(`DELETE FROM photo_likes WHERE id = ?`, [row.id], function(err) {
+                if (err) return res.status(500).json({ error: 'Error al quitar like' });
+                db.get(`SELECT COUNT(*) as count FROM photo_likes WHERE photo_id = ?`, [photoId], (err, result) => {
+                    res.json({ action: 'unliked', likes: result ? result.count : 0 });
+                });
+            });
+        } else {
+            db.run(`INSERT INTO photo_likes (photo_id, user_id) VALUES (?, ?)`, [photoId, userId], function(err) {
+                if (err) return res.status(500).json({ error: 'Error al dar like' });
+                db.get(`SELECT COUNT(*) as count FROM photo_likes WHERE photo_id = ?`, [photoId], (err, result) => {
+                    res.json({ action: 'liked', likes: result ? result.count : 0 });
+                });
+            });
+        }
+    });
+});
+
+// Get comments for photo
+app.get('/api/photos/:id/comments', (req, res) => {
+    db.all(`SELECT * FROM photo_comments WHERE photo_id = ? ORDER BY created_at ASC`, [req.params.id], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error' });
+        res.json(rows);
+    });
+});
+
+// Add comment to photo
+app.post('/api/photos/:id/comments', (req, res) => {
+    const photoId = req.params.id;
+    const { user_id, user_name, comment } = req.body;
+
+    if (!user_id || !user_name || !comment) return res.status(400).json({ error: 'Faltan campos obligatorios' });
+
+    db.run(`INSERT INTO photo_comments (photo_id, user_id, user_name, comment) VALUES (?, ?, ?, ?)`, 
+    [photoId, user_id, user_name, comment], function(err) {
+        if (err) return res.status(500).json({ error: 'Error al comentar' });
+        
+        db.get(`SELECT * FROM photo_comments WHERE id = ?`, [this.lastID], (err, row) => {
+            res.status(201).json(row);
         });
     });
 });
 
-// Comment a photo
-app.post('/api/photos/:id/comment', (req, res) => {
-    const photoId = req.params.id;
-    db.run(`UPDATE photos SET comments = comments + 1 WHERE id = ?`, [photoId], function(err) {
-        if (err) return res.status(500).json({ error: 'Error al añadir comentario' });
-        db.get(`SELECT comments FROM photos WHERE id = ?`, [photoId], (err, row) => {
-            if (err || !row) return res.status(500).json({ error: 'Error' });
-            res.json({ comments: row.comments });
-        });
-    });
-});
+
 
 // Update user account settings
 app.put('/api/users/:id', (req, res) => {
@@ -550,6 +685,93 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), (req, res) =
     }
 
     res.json({ received: true });
+});
+
+// --- ADMIN API ---
+
+// Get all users
+app.get('/api/admin/users', (req, res) => {
+    db.all(`SELECT id, name, email, type, password FROM users`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error al obtener usuarios' });
+        res.json(rows);
+    });
+});
+
+// Edit user
+app.put('/api/admin/users/:id', (req, res) => {
+    const userId = req.params.id;
+    const { name, email, password, type } = req.body;
+    db.run(
+        `UPDATE users SET name = ?, email = ?, password = ?, type = ? WHERE id = ?`,
+        [name, email, password, type, userId],
+        function(err) {
+            if (err) return res.status(500).json({ error: 'Error al actualizar usuario' });
+            res.json({ message: 'Usuario actualizado correctamente' });
+        }
+    );
+});
+
+// Delete user
+app.delete('/api/admin/users/:id', (req, res) => {
+    const userId = req.params.id;
+    // Note: A full implementation would cascade delete trips and reservations, but for simplicity we delete the user
+    db.run(`DELETE FROM users WHERE id = ?`, [userId], function(err) {
+        if (err) return res.status(500).json({ error: 'Error al eliminar usuario' });
+        res.json({ message: 'Usuario eliminado correctamente' });
+    });
+});
+
+// Delete trip (Admin)
+app.delete('/api/admin/trips/:id', (req, res) => {
+    const tripId = req.params.id;
+    // Delete reservations first
+    db.run(`DELETE FROM reservations WHERE trip_id = ?`, [tripId], function(err) {
+        if (err) return res.status(500).json({ error: 'Error al cancelar reservas' });
+        // Delete trip
+        db.run(`DELETE FROM trips WHERE id = ?`, [tripId], function(err) {
+            if (err) return res.status(500).json({ error: 'Error al eliminar el viaje' });
+            res.json({ message: 'Viaje eliminado por administrador' });
+        });
+    });
+});
+
+// Get all reservations
+app.get('/api/admin/reservations', (req, res) => {
+    const sql = `
+        SELECT r.id, r.created_at, t.origin, t.destination, t.date, t.time, u.name as user_name, u.email as user_email
+        FROM reservations r
+        JOIN trips t ON r.trip_id = t.id
+        JOIN users u ON r.user_id = u.id
+        ORDER BY r.created_at DESC
+    `;
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error al obtener reservas' });
+        res.json(rows);
+    });
+});
+
+// Cancel reservation (Admin)
+app.delete('/api/admin/reservations/:id', (req, res) => {
+    const reservationId = req.params.id;
+    db.get('SELECT trip_id FROM reservations WHERE id = ?', [reservationId], (err, row) => {
+        if (!row) return res.status(404).json({ error: 'Reserva no encontrada' });
+        const tripId = row.trip_id;
+        db.run(`DELETE FROM reservations WHERE id = ?`, [reservationId], function(err) {
+            if (err) return res.status(500).json({ error: 'Error al cancelar la reserva' });
+            // Increment seats
+            db.run(`UPDATE trips SET seats = seats + 1 WHERE id = ?`, [tripId], function(err) {
+                res.json({ message: 'Reserva eliminada por administrador' });
+            });
+        });
+    });
+});
+
+// Get all audit logs (Admin)
+app.get('/api/admin/logs', (req, res) => {
+    db.all(`SELECT * FROM audit_logs ORDER BY created_at DESC`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'Error al obtener logs' });
+        res.json(rows);
+    });
 });
 
 // Start Server
