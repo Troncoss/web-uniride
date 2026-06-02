@@ -13,6 +13,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uniride - Viajes Compartidos entre Universitarios</title>
     <meta name="description" content="Uniride conecta conductores y viajeros universitarios para compartir viajes de forma económica y sostenible en Córdoba y alrededores.">
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="uniride_logo.png">
     <link rel="apple-touch-icon" href="uniride_logo.png">
@@ -182,6 +185,162 @@
             <!-- Role Banner -->
             <div id="roleBanner" class="max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3"></div>
 
+            <!-- Admin Panel -->
+            <div id="adminPanel" class="max-w-6xl mx-auto mb-16 hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-shield-alt text-red-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Panel de Administración</h3>
+                            <p class="text-gray-600">Gestiona usuarios, viajes y reservas de la plataforma</p>
+                        </div>
+                    </div>
+
+                    <!-- Admin Tabs -->
+                    <div class="flex space-x-4 border-b border-gray-200 mb-6 overflow-x-auto">
+                        <button class="admin-tab-btn active px-4 py-2 text-red-600 border-b-2 border-red-600 font-medium" data-target="adminUsers">Usuarios</button>
+                        <button class="admin-tab-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-medium" data-target="adminTrips">Viajes</button>
+                        <button class="admin-tab-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-medium" data-target="adminReservations">Reservas</button>
+                        <button class="admin-tab-btn px-4 py-2 text-gray-500 hover:text-gray-700 font-medium" data-target="adminLogs">Historial</button>
+                    </div>
+
+                    <!-- Admin Sections -->
+                    <div id="adminUsers" class="admin-section">
+                        <div class="mb-4">
+                            <div class="relative w-full md:w-1/2">
+                                <span class="absolute left-3 top-2.5 text-gray-400"><i class="fas fa-search"></i></span>
+                                <input type="text" id="searchAdminUsers" placeholder="Buscar por nombre, email o ID..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-700">
+                                        <th class="p-3 border-b">ID</th>
+                                        <th class="p-3 border-b">Nombre</th>
+                                        <th class="p-3 border-b">Email</th>
+                                        <th class="p-3 border-b">Tipo</th>
+                                        <th class="p-3 border-b">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminUsersTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="adminTrips" class="admin-section hidden">
+                        <div class="mb-4">
+                            <div class="relative w-full md:w-1/2">
+                                <span class="absolute left-3 top-2.5 text-gray-400"><i class="fas fa-search"></i></span>
+                                <input type="text" id="searchAdminTrips" placeholder="Buscar por conductor o ruta..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-700">
+                                        <th class="p-3 border-b">ID</th>
+                                        <th class="p-3 border-b">Conductor</th>
+                                        <th class="p-3 border-b">Ruta</th>
+                                        <th class="p-3 border-b">Fecha/Hora</th>
+                                        <th class="p-3 border-b">Asientos</th>
+                                        <th class="p-3 border-b">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminTripsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="adminReservations" class="admin-section hidden">
+                        <div class="mb-4">
+                            <div class="relative w-full md:w-1/2">
+                                <span class="absolute left-3 top-2.5 text-gray-400"><i class="fas fa-search"></i></span>
+                                <input type="text" id="searchAdminReservations" placeholder="Buscar por viajero, email o ruta..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-700">
+                                        <th class="p-3 border-b">ID</th>
+                                        <th class="p-3 border-b">Viajero</th>
+                                        <th class="p-3 border-b">Viaje</th>
+                                        <th class="p-3 border-b">Fecha/Hora Viaje</th>
+                                        <th class="p-3 border-b">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminReservationsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="adminLogs" class="admin-section hidden">
+                        <div class="mb-4">
+                            <div class="relative w-full md:w-1/2">
+                                <span class="absolute left-3 top-2.5 text-gray-400"><i class="fas fa-search"></i></span>
+                                <input type="text" id="searchAdminLogs" placeholder="Buscar en el historial..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-700">
+                                        <th class="p-3 border-b">Fecha y Hora</th>
+                                        <th class="p-3 border-b">Acción</th>
+                                        <th class="p-3 border-b">Entidad</th>
+                                        <th class="p-3 border-b w-1/2">Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminLogsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit User Modal (Admin) -->
+            <div id="adminEditUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+                <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">Editar Usuario</h3>
+                        <button onclick="document.getElementById('adminEditUserModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <form id="adminEditUserForm" class="space-y-4">
+                        <input type="hidden" id="editUserId">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                            <input type="text" id="editUserName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="editUserEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña (dejar en blanco para mantener actual)</label>
+                            <input type="password" id="editUserPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            <input type="hidden" id="editUserOldPassword">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select id="editUserType" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                <option value="traveler">Viajero</option>
+                                <option value="driver">Conductor</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                        <div class="flex space-x-4 pt-2">
+                            <button type="button" onclick="document.getElementById('adminEditUserModal').classList.add('hidden')" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">Cancelar</button>
+                            <button type="submit" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Main Panels -->
             <div id="mainPanelsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16">
                 <!-- Panel 1: Crear Viaje (solo conductores) -->
@@ -209,6 +368,23 @@
                                 <div class="autocomplete-list" id="destinationList"></div>
                             </div>
                         </div>
+
+                        <!-- Map Section -->
+                        <div class="w-full">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Selecciona la ruta en el mapa (opcional)</label>
+                            <p class="text-xs text-gray-500 mb-2">Escribe las calles arriba o haz clic para establecer Origen (Verde) y Destino (Rojo).</p>
+                            <div id="tripMap" class="w-full h-64 rounded-lg border border-gray-300 z-10" style="position: relative; z-index: 10;"></div>
+                            <div id="distanceDisplay" class="mt-3 hidden flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <div class="text-primary font-semibold bg-primary bg-opacity-10 px-4 py-3 rounded-lg flex items-center w-full sm:w-auto">
+                                    <i class="fas fa-route mr-3 text-xl"></i>
+                                    <span>Distancia: <span id="distanceValue" class="text-xl font-bold">0</span> km</span>
+                                </div>
+                                <div id="recommendedPriceContainer" class="hidden text-green-700 bg-green-100 px-4 py-3 rounded-lg flex items-center w-full sm:w-auto">
+                                    <i class="fas fa-lightbulb mr-3 text-xl"></i>
+                                    <span>Recomendado: <span id="recommendedPriceValue" class="text-xl font-bold">0.00</span> €</span>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -230,19 +406,20 @@
                             </div>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio por persona</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-3 text-gray-500">€</span>
-                                <input type="number" required min="0" step="0.01" placeholder="0.00" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo del coche</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-car"></i></span>
+                                    <input type="text" id="carModelInput" placeholder="Ej: Renault Clio, Ford Focus..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo del coche</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-car"></i></span>
-                                <input type="text" id="carModelInput" placeholder="Ej: Renault Clio, Ford Focus..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Consumo Medio (L/100km)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-gas-pump"></i></span>
+                                    <input type="number" id="consumptionInput" step="0.1" min="0" placeholder="Ej: 6.5 (Opcional)" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
                             </div>
                         </div>
                         
@@ -251,7 +428,16 @@
                             <textarea rows="3" placeholder="Detalles adicionales sobre el viaje..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
                         </div>
                         
-                        <button type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg hover:bg-secondary transition duration-200 flex items-center justify-center">
+                        <div class="border-t border-gray-200 pt-6 mt-4">
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Precio final por persona</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-4 text-gray-600 font-bold text-lg">€</span>
+                                <input type="number" id="tripPriceInput" required min="0" step="0.01" placeholder="Añade el consumo primero..." disabled class="w-full pl-10 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-lg font-semibold transition-colors duration-200">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle mr-1"></i> El precio se desbloquea tras poner el consumo medio y fijar la ruta en el mapa.</p>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-semibold text-lg hover:bg-secondary transition duration-200 flex items-center justify-center mt-2">
                             <i class="fas fa-plus-circle mr-3"></i>Publicar Viaje
                         </button>
                     </form>
@@ -283,7 +469,7 @@
                         </div>
                     </div>
                     
-                    <div id="tripsList" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                    <div id="tripsList" class="space-y-4 max-h-[800px] overflow-y-auto pr-2 pb-8">
                         <!-- Trips will be rendered here -->
                     </div>
                     
@@ -688,7 +874,6 @@
                             <i class="fas fa-car text-gray-400 mr-3"></i>
                             <span>${trip.car}</span>
                         </div>` : ''}
-                        </div>
                         <div class="flex items-center text-gray-700">
                             <i class="fas fa-users text-gray-400 mr-3"></i>
                             <span>${trip.seats} asiento${trip.seats !== 1 ? 's' : ''} disponible${trip.seats !== 1 ? 's' : ''}</span>
@@ -697,7 +882,19 @@
                             <i class="fas fa-info-circle text-gray-400 mr-3"></i>
                             <span>${trip.description}</span>
                         </div>` : ''}
+                        ${trip.recommended_price ? `<div class="flex items-center text-green-700 bg-green-100 px-3 py-1 rounded-md text-xs font-medium w-fit mt-2">
+                            <i class="fas fa-lightbulb mr-2"></i> Sugerido por consumo: ${trip.recommended_price} €
+                        </div>` : ''}
                     </div>
+                    
+                    ${trip.origin_lat && trip.dest_lat ? `
+                    <button class="w-full mb-3 bg-blue-50 text-blue-600 border border-blue-200 py-3 rounded-lg font-medium hover:bg-blue-100 transition duration-200 flex items-center justify-center view-route-btn"
+                        data-olat="${trip.origin_lat}" data-olng="${trip.origin_lng}" 
+                        data-dlat="${trip.dest_lat}" data-dlng="${trip.dest_lng}"
+                        data-origin="${trip.origin}" data-dest="${trip.destination}">
+                        <i class="fas fa-map-marked-alt mr-2 text-lg"></i>Ver Ruta en Mapa
+                    </button>
+                    ` : ''}
                     
                     ${actionBtn}
                 </div>
@@ -780,8 +977,10 @@
                                     <span id="comments-count-${photo.id}">${photo.comments || 0}</span>
                                 </button>
                             </div>
-                            <button class="like-photo-btn text-gray-400 hover:text-red-400 transition duration-200" data-photo-id="${photo.id}">
-                                <i class="far fa-heart"></i>
+                            <button class="like-photo-btn transition duration-200" data-photo-id="${photo.id}">
+                                ${window.userLikedPhotoIds && window.userLikedPhotoIds.includes(photo.id) 
+                                    ? '<i class="fas fa-heart text-red-400"></i>' 
+                                    : '<i class="far fa-heart text-gray-400 hover:text-red-400"></i>'}
                             </button>
                         </div>
                     </div>
@@ -821,9 +1020,9 @@
 
             if (userName) userName.textContent = currentUser.name;
             if (userTypeBadge) {
-                userTypeBadge.textContent = userType === 'driver' ? 'Conductor' : 'Viajero';
+                userTypeBadge.textContent = userType === 'admin' ? 'Administrador' : (userType === 'driver' ? 'Conductor' : 'Viajero');
                 userTypeBadge.className = `px-2 py-1 rounded-full text-xs font-medium ${
-                    userType === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                    userType === 'admin' ? 'bg-red-100 text-red-800' : (userType === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800')
                 }`;
             }
             if (welcomeMessage) {
@@ -848,7 +1047,10 @@
             // Role banner
             const roleBanner = document.getElementById('roleBanner');
             if (roleBanner) {
-                if (userType === 'driver') {
+                if (userType === 'admin') {
+                    roleBanner.className = 'max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-between bg-red-50 text-red-800 border border-red-200';
+                    roleBanner.innerHTML = '<div class="flex items-center gap-3"><i class="fas fa-shield-alt"></i> <span>Estás usando Uniride como <strong>Administrador</strong>. Tienes acceso completo para gestionar la plataforma.</span></div> <button onclick="this.parentElement.style.display=\'none\'" class="text-red-500 hover:text-red-700 ml-4 p-1 rounded hover:bg-red-100 transition"><i class="fas fa-times"></i></button>';
+                } else if (userType === 'driver') {
                     roleBanner.className = 'max-w-6xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-between bg-blue-50 text-blue-800 border border-blue-200';
                     roleBanner.innerHTML = '<div class="flex items-center gap-3"><i class="fas fa-car"></i> <span>Estás usando Uniride como <strong>Conductor</strong>. Puedes publicar viajes y también unirte a viajes de otros conductores.</span></div> <button onclick="this.parentElement.style.display=\'none\'" class="text-blue-500 hover:text-blue-700 ml-4 p-1 rounded hover:bg-blue-100 transition"><i class="fas fa-times"></i></button>';
                 } else {
@@ -981,6 +1183,24 @@
             
             // Dashboard functionality
             function initializeDashboardContent() {
+                if (userType === 'admin') {
+                    // Hide regular panels
+                    const panelsToHide = document.querySelectorAll('#mainPanelsGrid, #multimediaSection, #pendingTripsSection, #pastTripsSection');
+                    panelsToHide.forEach(el => {
+                        if (el) el.classList.add('hidden');
+                    });
+                    
+                    // Hide multimedia, pending and past sections using their classes if they don't have IDs
+                    document.querySelectorAll('.max-w-6xl.mx-auto.mb-16').forEach((el, index) => {
+                        if (el.id !== 'adminPanel') el.classList.add('hidden');
+                    });
+
+                    // Show Admin Panel
+                    document.getElementById('adminPanel').classList.remove('hidden');
+                    loadAdminData();
+                    return;
+                }
+
                 // Fetch trips from database
                 fetch('/api/trips')
                     .then(res => res.json())
@@ -989,6 +1209,7 @@
                         const tripsList = document.getElementById('tripsList');
                         if (tripsList) {
                             tripsList.innerHTML = renderTripCards(availableTrips);
+                            bindViewRouteEvents();
                         }
                         
                         // Fetch user specific trips (pending and past)
@@ -1010,6 +1231,7 @@
                                     tripsList.innerHTML = renderTripCards(availableTrips);
                                     bindJoinTripEvents();
                                     bindCancelTripEvents();
+                                    bindViewRouteEvents();
                                 }
 
                                 const pendingTripsContainer = document.getElementById('pendingTrips');
@@ -1051,15 +1273,18 @@
                     });
                 
                 // Fetch photos from database
-                fetch('/api/photos')
-                    .then(res => res.json())
-                    .then(photos => {
-                        travelPhotos = photos;
-                        const photoGrid = document.getElementById('photoGrid');
-                        if (photoGrid) {
-                            photoGrid.innerHTML = renderTravelPhotos(travelPhotos);
-                        }
-                    })
+                Promise.all([
+                    fetch('/api/photos').then(res => res.json()),
+                    fetch(`/api/users/${currentUser.id}/photo_likes`).then(res => res.json())
+                ])
+                .then(([photos, likes]) => {
+                    travelPhotos = photos;
+                    window.userLikedPhotoIds = likes;
+                    const photoGrid = document.getElementById('photoGrid');
+                    if (photoGrid) {
+                        photoGrid.innerHTML = renderTravelPhotos(travelPhotos);
+                    }
+                })
                     .catch(() => {
                         const photoGrid = document.getElementById('photoGrid');
                         if (photoGrid) {
@@ -1097,6 +1322,7 @@
                             seatCount--;
                         }
                         seatDisplay.textContent = seatCount;
+                        if (typeof updateRecommendedPrice === 'function') updateRecommendedPrice();
                     });
                 });
                 
@@ -1105,12 +1331,11 @@
                 if (createTripForm) {
                     createTripForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        const inputs = createTripForm.querySelectorAll('input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea');
-                        const origin = inputs[0].value;
-                        const destination = inputs[1].value;
-                        const date = inputs[2].value;
-                        const time = inputs[3].value;
-                        const price = inputs[4].value;
+                        const origin = document.getElementById('originInput').value;
+                        const destination = document.getElementById('destinationInput').value;
+                        const date = document.getElementById('tripDateInput').value;
+                        const time = createTripForm.querySelector('input[type="time"]').value;
+                        const price = document.getElementById('tripPriceInput').value;
                         const carModel = document.getElementById('carModelInput').value;
                         const description = createTripForm.querySelector('textarea') ? createTripForm.querySelector('textarea').value : '';
 
@@ -1120,6 +1345,23 @@
                             showNotification('No puedes crear un viaje para una fecha pasada', 'error');
                             return;
                         }
+                        
+                        // Validate map distance is calculated
+                        if (!window.currentTripDistanceKm || window.currentTripDistanceKm <= 0) {
+                            showNotification('Debes seleccionar un origen y destino reales en el mapa o buscar calles válidas para calcular la distancia', 'error');
+                            return;
+                        }
+                        
+                        // Validate consumption is entered
+                        const consumption = document.getElementById('consumptionInput')?.value;
+                        if (!consumption || parseFloat(consumption) <= 0) {
+                            showNotification('Debes poner el consumo medio de tu coche para publicar el viaje', 'error');
+                            return;
+                        }
+
+                        // Get coordinates from markers if they exist
+                        const oMarker = typeof originMarker !== 'undefined' && originMarker ? originMarker.getLatLng() : null;
+                        const dMarker = typeof destMarker !== 'undefined' && destMarker ? destMarker.getLatLng() : null;
 
                         try {
                             const response = await fetch('/api/trips', {
@@ -1129,10 +1371,15 @@
                                     origin, destination, date, time,
                                     seats: seatCount,
                                     price: parseFloat(price),
+                                    recommended_price: window.currentRecommendedPrice || null,
                                     car: carModel,
                                     description,
                                     driver_id: currentUser.id,
-                                    driver_name: currentUser.name
+                                    driver_name: currentUser.name,
+                                    origin_lat: oMarker ? oMarker.lat : null,
+                                    origin_lng: oMarker ? oMarker.lng : null,
+                                    dest_lat: dMarker ? dMarker.lat : null,
+                                    dest_lng: dMarker ? dMarker.lng : null
                                 })
                             });
                             if (response.ok) {
@@ -1199,6 +1446,7 @@
                         tripsList.innerHTML = renderTripCards(filtered);
                         bindJoinTripEvents();
                         bindCancelTripEvents();
+                        bindViewRouteEvents();
                     }
                 }
                 
@@ -1374,25 +1622,24 @@
                         if (likeBtn) {
                             const photoId = likeBtn.dataset.photoId;
                             const icon = likeBtn.querySelector('i');
-                            const action = icon.classList.contains('far') ? 'like' : 'unlike';
                             
                             try {
                                 const response = await fetch(`/api/photos/${photoId}/like`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ action })
+                                    body: JSON.stringify({ user_id: currentUser.id })
                                 });
                                 if (response.ok) {
                                     const data = await response.json();
                                     document.getElementById(`likes-count-${photoId}`).textContent = data.likes;
-                                    if (action === 'like') {
-                                        icon.classList.remove('far');
-                                        icon.classList.add('fas', 'text-red-400');
-                                        showNotification('¡Foto añadida a favoritos!', 'success');
+                                    if (data.action === 'liked') {
+                                        icon.className = 'fas fa-heart text-red-400';
+                                        if (!window.userLikedPhotoIds.includes(parseInt(photoId))) window.userLikedPhotoIds.push(parseInt(photoId));
+                                        showNotification('¡Te gusta esta foto!', 'success');
                                     } else {
-                                        icon.classList.remove('fas', 'text-red-400');
-                                        icon.classList.add('far');
-                                        showNotification('Foto removida de favoritos', 'info');
+                                        icon.className = 'far fa-heart text-gray-400 hover:text-red-400';
+                                        window.userLikedPhotoIds = window.userLikedPhotoIds.filter(id => id !== parseInt(photoId));
+                                        showNotification('Ya no te gusta esta foto', 'info');
                                     }
                                 }
                             } catch (err) {
@@ -1402,21 +1649,7 @@
                         
                         if (commentBtn) {
                             const photoId = commentBtn.dataset.photoId;
-                            const comment = prompt('Escribe tu comentario:');
-                            if (comment && comment.trim() !== '') {
-                                try {
-                                    const response = await fetch(`/api/photos/${photoId}/comment`, {
-                                        method: 'POST'
-                                    });
-                                    if (response.ok) {
-                                        const data = await response.json();
-                                        document.getElementById(`comments-count-${photoId}`).textContent = data.comments;
-                                        showNotification('¡Comentario publicado!', 'success');
-                                    }
-                                } catch (err) {
-                                    showNotification('Error al publicar comentario', 'error');
-                                }
-                            }
+                            openCommentsModal(photoId);
                         }
                     });
                 }
@@ -1542,6 +1775,7 @@
                     setTimeout(() => notification.remove(), 300);
                 }, 3000);
             }
+            window.showNotification = showNotification; // Hacerlo accesible de forma global
             
             // Prevent # links
             document.addEventListener('click', function(ev) {
@@ -1829,13 +2063,519 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupAutocomplete('originInput', 'originList');
             setupAutocomplete('destinationInput', 'destinationList');
+            if(currentUser.type === 'driver') setTimeout(initTripMap, 300);
         });
         // Also run immediately in case DOM is already loaded
         if (document.readyState !== 'loading') {
             setupAutocomplete('originInput', 'originList');
             setupAutocomplete('destinationInput', 'destinationList');
+            if(currentUser.type === 'driver') setTimeout(initTripMap, 300);
         }
     })();
+
+    // ── Admin Panel Logic ──────────────────────────────────────────────────
+    function loadAdminData() {
+        // Setup tabs
+        document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.admin-tab-btn').forEach(b => {
+                    b.classList.remove('text-red-600', 'border-b-2', 'border-red-600');
+                    b.classList.add('text-gray-500');
+                });
+                e.target.classList.remove('text-gray-500');
+                e.target.classList.add('text-red-600', 'border-b-2', 'border-red-600');
+
+                document.querySelectorAll('.admin-section').forEach(sec => sec.classList.add('hidden'));
+                document.getElementById(e.target.dataset.target).classList.remove('hidden');
+            });
+        });
+
+        fetchAdminUsers();
+        fetchAdminTrips();
+        fetchAdminReservations();
+        fetchAdminLogs();
+        setupAdminSearch();
+    }
+
+    function setupAdminSearch() {
+        const setupSearch = (inputId, tableBodyId) => {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll(`#${tableBodyId} tr`);
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+        };
+
+        setupSearch('searchAdminUsers', 'adminUsersTableBody');
+        setupSearch('searchAdminTrips', 'adminTripsTableBody');
+        setupSearch('searchAdminReservations', 'adminReservationsTableBody');
+        setupSearch('searchAdminLogs', 'adminLogsTableBody');
+    }
+
+    function fetchAdminLogs() {
+        fetch('/api/admin/logs')
+            .then(res => res.json())
+            .then(logs => {
+                const tbody = document.getElementById('adminLogsTableBody');
+                tbody.innerHTML = logs.map(l => {
+                    const actionClass = l.action === 'CREATE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                    const date = new Date(l.created_at).toLocaleString();
+                    return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 text-sm">${date}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-medium ${actionClass}">${l.action}</span></td>
+                        <td class="p-3 text-gray-500 capitalize">${l.entity} (ID: ${l.entity_id})</td>
+                        <td class="p-3 text-gray-700">${l.details}</td>
+                    </tr>
+                `}).join('');
+            });
+    }
+
+    function fetchAdminUsers() {
+        fetch('/api/admin/users')
+            .then(res => res.json())
+            .then(users => {
+                const tbody = document.getElementById('adminUsersTableBody');
+                tbody.innerHTML = users.map(u => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${u.id}</td>
+                        <td class="p-3">${u.name}</td>
+                        <td class="p-3">${u.email}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-medium ${u.type === 'admin' ? 'bg-red-100 text-red-800' : (u.type === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800')}">${u.type}</span></td>
+                        <td class="p-3">
+                            <button onclick="openEditUserModal(${u.id}, '${u.name}', '${u.email}', '${u.type}', '${u.password}')" class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteAdminUser(${u.id})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    function fetchAdminTrips() {
+        fetch('/api/trips')
+            .then(res => res.json())
+            .then(trips => {
+                const tbody = document.getElementById('adminTripsTableBody');
+                tbody.innerHTML = trips.map(t => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${t.id}</td>
+                        <td class="p-3">${t.driver_name}</td>
+                        <td class="p-3">${t.origin} → ${t.destination}</td>
+                        <td class="p-3">${t.date} ${t.time}</td>
+                        <td class="p-3">${t.seats}</td>
+                        <td class="p-3">
+                            <button onclick="deleteAdminTrip(${t.id})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    function fetchAdminReservations() {
+        fetch('/api/admin/reservations')
+            .then(res => res.json())
+            .then(res => {
+                const tbody = document.getElementById('adminReservationsTableBody');
+                tbody.innerHTML = res.map(r => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">${r.id}</td>
+                        <td class="p-3">${r.user_name} (${r.user_email})</td>
+                        <td class="p-3">${r.origin} → ${r.destination}</td>
+                        <td class="p-3">${r.date} ${r.time}</td>
+                        <td class="p-3">
+                            <button onclick="deleteAdminReservation(${r.id})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    // Admin Actions
+    window.openEditUserModal = function(id, name, email, type, password) {
+        document.getElementById('editUserId').value = id;
+        document.getElementById('editUserName').value = name;
+        document.getElementById('editUserEmail').value = email;
+        document.getElementById('editUserType').value = type;
+        document.getElementById('editUserOldPassword').value = password;
+        document.getElementById('editUserPassword').value = '';
+        document.getElementById('adminEditUserModal').classList.remove('hidden');
+    };
+
+    document.getElementById('adminEditUserForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('editUserId').value;
+        const name = document.getElementById('editUserName').value;
+        const email = document.getElementById('editUserEmail').value;
+        const type = document.getElementById('editUserType').value;
+        const newPassword = document.getElementById('editUserPassword').value;
+        const oldPassword = document.getElementById('editUserOldPassword').value;
+        
+        fetch(`/api/admin/users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, type, password: newPassword || oldPassword })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) showNotification(data.error, 'error');
+            else {
+                showNotification(data.message, 'success');
+                document.getElementById('adminEditUserModal').classList.add('hidden');
+                setTimeout(() => window.location.reload(), 800);
+            }
+        });
+    });
+
+    window.deleteAdminUser = function(id) {
+        if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+        fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            showNotification(data.message || data.error, data.error ? 'error' : 'success');
+            setTimeout(() => window.location.reload(), 800);
+        });
+    };
+
+    window.deleteAdminTrip = function(id) {
+        if (!confirm('¿Estás seguro de eliminar este viaje?')) return;
+        fetch(`/api/admin/trips/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            showNotification(data.message || data.error, data.error ? 'error' : 'success');
+            setTimeout(() => window.location.reload(), 800);
+        });
+    };
+
+    window.deleteAdminReservation = function(id) {
+        if (!confirm('¿Estás seguro de cancelar esta reserva?')) return;
+        fetch(`/api/admin/reservations/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            showNotification(data.message || data.error, data.error ? 'error' : 'success');
+            setTimeout(() => window.location.reload(), 800);
+        });
+    };
+
+    // ── Mapa de Leaflet y Cálculo de Distancias ──
+    let tripMap, originMarker, destMarker, routeLine;
+    const cordobaCoords = [37.8882, -4.7794];
+
+    function initTripMap() {
+        if (!document.getElementById('tripMap')) return;
+        if (tripMap) return; // Ya inicializado
+        
+        tripMap = L.map('tripMap').setView(cordobaCoords, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(tripMap);
+
+        setTimeout(() => tripMap.invalidateSize(), 500);
+
+        tripMap.on('click', async function(e) {
+            const latlng = e.latlng;
+            if (!originMarker || (originMarker && destMarker)) {
+                // Set Origin
+                if (originMarker) tripMap.removeLayer(originMarker);
+                if (destMarker) tripMap.removeLayer(destMarker);
+                if (routeLine) tripMap.removeLayer(routeLine);
+                destMarker = null;
+                document.getElementById('distanceDisplay').classList.add('hidden');
+
+                originMarker = L.marker(latlng, { icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41]}) }).addTo(tripMap);
+                document.getElementById('originInput').value = await getStreetName(latlng);
+            } else if (!destMarker) {
+                // Set Destination
+                destMarker = L.marker(latlng, { icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41]}) }).addTo(tripMap);
+                document.getElementById('destinationInput').value = await getStreetName(latlng);
+                calculateDistance();
+            }
+        });
+
+        document.getElementById('originInput').addEventListener('blur', async (e) => {
+            if (e.target.value && e.target.value.length > 3) {
+                const coords = await getCoords(e.target.value);
+                if (coords) {
+                    if (originMarker) tripMap.removeLayer(originMarker);
+                    originMarker = L.marker(coords, { icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41]}) }).addTo(tripMap);
+                    tripMap.setView(coords, 14);
+                    calculateDistance();
+                }
+            }
+        });
+
+        document.getElementById('destinationInput').addEventListener('blur', async (e) => {
+            if (e.target.value && e.target.value.length > 3) {
+                const coords = await getCoords(e.target.value);
+                if (coords) {
+                    if (destMarker) tripMap.removeLayer(destMarker);
+                    destMarker = L.marker(coords, { icon: L.icon({iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41]}) }).addTo(tripMap);
+                    if (!originMarker) tripMap.setView(coords, 14);
+                    calculateDistance();
+                }
+            }
+        });
+    }
+
+    async function getStreetName(latlng) {
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
+            const data = await res.json();
+            return data.address.road ? `${data.address.road}, Córdoba` : (data.display_name.split(',')[0] + ', Córdoba');
+        } catch(e) { return 'Punto en el mapa'; }
+    }
+
+    async function getCoords(streetName) {
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(streetName + ', Córdoba, España')}`);
+            const data = await res.json();
+            if (data && data.length > 0) return [data[0].lat, data[0].lon];
+        } catch(e) { return null; }
+        return null;
+    }
+
+    async function calculateDistance() {
+        if (!originMarker || !destMarker) return;
+        const o = originMarker.getLatLng();
+        const d = destMarker.getLatLng();
+        try {
+            const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${o.lng},${o.lat};${d.lng},${d.lat}?overview=full&geometries=geojson`);
+            const data = await res.json();
+            if (data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                const distanceKm = (route.distance / 1000).toFixed(2);
+                document.getElementById('distanceDisplay').classList.remove('hidden');
+                document.getElementById('distanceValue').textContent = distanceKm;
+                
+                window.currentTripDistanceKm = parseFloat(distanceKm);
+                updateRecommendedPrice();
+                
+                if (routeLine) tripMap.removeLayer(routeLine);
+                const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); // GeoJSON is [lng, lat]
+                routeLine = L.polyline(coords, {color: '#4F46E5', weight: 5, opacity: 0.8}).addTo(tripMap);
+                tripMap.fitBounds(routeLine.getBounds(), {padding: [30, 30]});
+            }
+        } catch (e) {
+            console.error('Error calculando distancia:', e);
+        }
+    }
+
+    function updateRecommendedPrice() {
+        const distanceKm = window.currentTripDistanceKm;
+        const consumption = parseFloat(document.getElementById('consumptionInput')?.value);
+        const container = document.getElementById('recommendedPriceContainer');
+        const valSpan = document.getElementById('recommendedPriceValue');
+        const priceInput = document.getElementById('tripPriceInput');
+        const seatCount = parseInt(document.getElementById('seatCount')?.textContent) || 1;
+
+        if (distanceKm > 0 && consumption > 0) {
+            const staticPrice = 1.60;
+            const cost = (consumption / 100) * distanceKm * staticPrice;
+            const recommended = (cost * 1.5) / seatCount; // Multiplied by 1.5 and divided by seats
+            window.currentRecommendedPrice = parseFloat(recommended.toFixed(2));
+            valSpan.textContent = window.currentRecommendedPrice.toFixed(2);
+            container.classList.remove('hidden');
+            
+            if (priceInput) {
+                priceInput.disabled = false;
+                priceInput.placeholder = "0.00";
+            }
+        } else {
+            window.currentRecommendedPrice = null;
+            container.classList.add('hidden');
+            
+            if (priceInput) {
+                priceInput.disabled = true;
+                priceInput.value = "";
+                priceInput.placeholder = "Añade el consumo primero...";
+            }
+        }
+    }
+
+    document.getElementById('consumptionInput')?.addEventListener('input', updateRecommendedPrice);
     </script>
+
+    <!-- Traveler Route Map Modal -->
+    <div id="routeMapModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-3xl mx-4 overflow-hidden shadow-2xl">
+            <div class="bg-primary text-white p-4 flex justify-between items-center">
+                <h3 class="text-xl font-bold truncate pr-4" id="routeMapModalTitle"><i class="fas fa-map-marked-alt mr-2"></i>Ruta del Viaje</h3>
+                <button id="closeRouteMapModal" class="text-white hover:text-gray-200 transition">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-0">
+                <div id="travelerMap" class="w-full h-96 z-10" style="position: relative; z-index: 10;"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Comments Modal -->
+    <div id="commentsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg mx-auto overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="bg-gray-50 border-b border-gray-100 p-4 flex justify-between items-center shrink-0">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-comments text-purple-500 mr-2"></i>Comentarios</h3>
+                <button id="closeCommentsModal" class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="commentsList" class="p-6 overflow-y-auto flex-1 space-y-2">
+                <!-- Comments rendered here -->
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-100 shrink-0">
+                <form id="commentForm" class="flex items-end space-x-2">
+                    <textarea id="newCommentText" required placeholder="Añade un comentario..." rows="1" class="flex-1 resize-none px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent max-h-32 min-h-[48px]"></textarea>
+                    <button type="submit" class="p-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition h-12 w-12 flex items-center justify-center">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Traveler Map Logic -->
+    <script>
+        let tMap = null;
+        let tRouteLine = null;
+        let tOriginMarker = null;
+        let tDestMarker = null;
+
+        function initTravelerMap() {
+            if (tMap) return;
+            tMap = L.map('travelerMap').setView([37.8882, -4.7794], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(tMap);
+        }
+
+        function bindViewRouteEvents() {
+            document.querySelectorAll('.view-route-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const olat = parseFloat(btn.dataset.olat);
+                    const olng = parseFloat(btn.dataset.olng);
+                    const dlat = parseFloat(btn.dataset.dlat);
+                    const dlng = parseFloat(btn.dataset.dlng);
+                    const originName = btn.dataset.origin;
+                    const destName = btn.dataset.dest;
+
+                    document.getElementById('routeMapModalTitle').innerHTML = `<i class="fas fa-map-marked-alt mr-2"></i>${originName} <i class="fas fa-arrow-right text-sm mx-1"></i> ${destName}`;
+                    document.getElementById('routeMapModal').classList.remove('hidden');
+                    
+                    initTravelerMap();
+                    
+                    // Small delay to ensure modal is visible so map gets correct size
+                    setTimeout(async () => {
+                        tMap.invalidateSize();
+                        
+                        if (tOriginMarker) tMap.removeLayer(tOriginMarker);
+                        if (tDestMarker) tMap.removeLayer(tDestMarker);
+                        if (tRouteLine) tMap.removeLayer(tRouteLine);
+
+                        const greenIcon = new L.Icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+                        });
+                        
+                        const redIcon = new L.Icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+                        });
+
+                        tOriginMarker = L.marker([olat, olng], {icon: greenIcon}).addTo(tMap).bindPopup('<b>Origen:</b> ' + originName);
+                        tDestMarker = L.marker([dlat, dlng], {icon: redIcon}).addTo(tMap).bindPopup('<b>Destino:</b> ' + destName);
+
+                        try {
+                            const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${olng},${olat};${dlng},${dlat}?overview=full&geometries=geojson`);
+                            const data = await res.json();
+                            if (data.routes && data.routes.length > 0) {
+                                const route = data.routes[0];
+                                const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+                                tRouteLine = L.polyline(coords, {color: '#4F46E5', weight: 5, opacity: 0.8}).addTo(tMap);
+                                tMap.fitBounds(tRouteLine.getBounds(), {padding: [30, 30]});
+                            }
+                        } catch (err) {
+                            console.error('Error fetching route:', err);
+                            tMap.fitBounds(L.latLngBounds([olat, olng], [dlat, dlng]), {padding: [30, 30]});
+                        }
+                    }, 200);
+                });
+            });
+        }
+
+        document.getElementById('closeRouteMapModal').addEventListener('click', () => {
+            document.getElementById('routeMapModal').classList.add('hidden');
+        });
+
+        // --- Comments Modal Logic ---
+        let currentPhotoIdForComments = null;
+        
+        async function openCommentsModal(photoId) {
+            currentPhotoIdForComments = photoId;
+            document.getElementById('commentsModal').classList.remove('hidden');
+            document.getElementById('commentsList').innerHTML = '<div class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Cargando comentarios...</p></div>';
+            
+            try {
+                const res = await fetch(`/api/photos/${photoId}/comments`);
+                const comments = await res.json();
+                renderComments(comments);
+            } catch (err) {
+                document.getElementById('commentsList').innerHTML = '<div class="text-center py-4 text-red-500"><p>Error al cargar comentarios.</p></div>';
+            }
+        }
+
+        function renderComments(comments) {
+            const list = document.getElementById('commentsList');
+            if (comments.length === 0) {
+                list.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="far fa-comments text-4xl mb-3"></i><p>Aún no hay comentarios. ¡Sé el primero!</p></div>';
+                return;
+            }
+            list.innerHTML = comments.map(c => `
+                <div class="mb-4">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="font-bold text-gray-800">${c.user_name}</span>
+                        <span class="text-xs text-gray-400">${c.created_at.split('T')[0]}</span>
+                    </div>
+                    <p class="text-gray-600 bg-gray-50 p-3 rounded-lg rounded-tl-none border border-gray-100">${c.comment}</p>
+                </div>
+            `).join('');
+            list.scrollTop = list.scrollHeight;
+        }
+
+        document.getElementById('closeCommentsModal').addEventListener('click', () => {
+            document.getElementById('commentsModal').classList.add('hidden');
+        });
+
+        document.getElementById('commentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('newCommentText');
+            const comment = input.value.trim();
+            if (!comment || !currentPhotoIdForComments) return;
+
+            try {
+                const response = await fetch(`/api/photos/${currentPhotoIdForComments}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUser.id, user_name: currentUser.name, comment })
+                });
+                if (response.ok) {
+                    input.value = '';
+                    // Reload comments
+                    openCommentsModal(currentPhotoIdForComments);
+                    
+                    // Increment counter in UI
+                    const countEl = document.getElementById(`comments-count-${currentPhotoIdForComments}`);
+                    if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
+                }
+            } catch (err) {
+                showNotification('Error al enviar el comentario', 'error');
+            }
+        });
+    </script>
+
 </body>
 </html>
